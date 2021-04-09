@@ -1,0 +1,117 @@
+#include "Processor.h"
+
+void Processor::omega_res(int res)
+    {
+        if (res == 0) omega = 0;
+        else
+        if (res < 0) omega = 1;
+        else
+            omega = 2;
+    }
+
+void Processor::omega_res(double res)
+    {
+        if (res == 0) omega = 0;
+        else
+        if (res < 0) omega = 1;
+        else
+            omega = 2;
+    }
+
+Processor::Processor()
+{
+    RA = 1;
+    Err = false;
+    omega = 0;
+}
+
+void Processor::input_punch_card(ifstream& fin)
+{
+    pars_obj.get_punch_card(fin, &mem_obj);
+}
+
+void Processor::output_memory(ofstream& fout)
+{
+    for (int i = 0; i < 512; i++)
+    {
+        if (i < 10) fout << "  ";
+        else
+        if (i < 100) fout << " ";
+
+        fout << i << " " << mem_obj.get(i) << "\n";
+    }
+}
+
+void Processor::add_int(int op1, int op2, int op3)
+{
+    int k1_res = Parser_UM_3::my_stoi(&mem_obj.get(op2)[0]) + Parser_UM_3::my_stoi(&mem_obj.get(op3)[0]);
+    omega_res(k1_res);
+    mem_obj.push(op1, Parser_UM_3::my_itos(k1_res));
+}
+
+void Processor::sub_int(int op1, int op2, int op3)
+{
+    int k1_res = Parser_UM_3::my_stoi(mem_obj.get(op2)) - Parser_UM_3::my_stoi(mem_obj.get(op3));
+    omega_res(k1_res);
+    mem_obj.push(op1, Parser_UM_3::my_itos(k1_res));
+}
+
+void Processor::send(int op1, int op3)
+{
+    mem_obj.push(op1, mem_obj.get(op3));
+}
+
+void Processor::just_if(int op1, int op2, int op3)
+{
+    switch (omega)
+    {
+        case 0:
+            RA = op1;
+            break;
+        case 1:
+            RA = op2;
+            break;
+        case 2:
+            RA = op3;
+            break;
+    }
+}
+
+void Processor::clear_memory()
+{
+    mem_obj.clear();
+}
+
+bool Processor::tact()
+{
+    RK = mem_obj.get(RA);
+    RA = (RA + 1) % 512;
+
+    Com command;
+    int op1, op2, op3;
+    Parser_UM_3::pars_of_cell(RK, command, op1, op2, op3);
+
+    switch (command)
+    {
+        case Com::ADDINT:
+            add_int(op1, op2, op3);
+            break;
+        case Com::SUBINT:
+            sub_int(op1, op2, op3);
+            break;
+        case Com::SEND:
+            send(op1, op3);
+            break;
+        case Com::IF:
+            just_if(op1, op2, op3);
+            break;
+        case Com::END:
+            return false;
+    }
+    return true;
+}
+
+void Processor::main_process()
+{
+    while (tact());
+}
