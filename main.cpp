@@ -4,7 +4,7 @@ int main()
 {
     Processor proc_obj;
 
-    ifstream fin("punch_card.txt");
+    ifstream fin("punched_card.txt");
     ofstream fout("result.txt");
 
     proc_obj.input_punch_card(fin);

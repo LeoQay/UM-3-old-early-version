@@ -2,7 +2,7 @@
 #include <cmath>
 using namespace std;
 
-int Parser_UM_3::my_stoi (std::string stroka, int origin_system)
+int Parser_UM_3::stoi (std::string stroka, int origin_system)
 {
     unsigned int num = 0, ten_sys, it = 0;
 
@@ -16,14 +16,14 @@ int Parser_UM_3::my_stoi (std::string stroka, int origin_system)
     return (signed int)num;
 }
 
-std::string Parser_UM_3::my_itos (int value, int length, int new_system)
+std::string Parser_UM_3::itos (int value, int length, int new_system)
 {
     auto val = (unsigned int)value;
     string answer;
 
     for (int i = 0; i < length; i++)
     {
-        answer = (char)('0' + val % new_system) + answer;
+        answer.insert(0, 1, (char)('0' + val % new_system));
         val /= new_system;
     }
 
@@ -33,7 +33,7 @@ std::string Parser_UM_3::my_itos (int value, int length, int new_system)
 int Parser_UM_3::command_check (string command)
 {
     if (isdigit(command[0]))
-        return my_stoi(command, 10);
+        return stoi(command, 10);
 
     return m[command];
 }
@@ -53,7 +53,7 @@ string Parser_UM_3::get_token (string& s)
     return answer;
 }
 
-void Parser_UM_3::get_punch_card (ifstream& fin, Memory* mem_obj)
+void Parser_UM_3::get_punched_card (ifstream &fin, Memory* mem_obj)
 {
     int position;
     while (!fin.eof())
@@ -62,14 +62,14 @@ void Parser_UM_3::get_punch_card (ifstream& fin, Memory* mem_obj)
         getline(fin, s);
 
         //   номер ячейки
-        position = my_stoi(get_token(s), 10);
+        position = stoi(get_token(s), 10);
 
         //   команда
-        result += my_itos(command_check(get_token(s)), 5);
+        result += itos(command_check(get_token(s)), 5);
 
         // op1, op2, op3
         for (int i = 0; i < 3; i++)
-            result += my_itos(my_stoi(get_token(s), 10), 9);
+            result += itos(stoi(get_token(s), 10), 9);
 
         (*mem_obj).push(position, result);
     }
@@ -77,10 +77,10 @@ void Parser_UM_3::get_punch_card (ifstream& fin, Memory* mem_obj)
 
 void Parser_UM_3::pars_of_cell (string s, Com& command, int& op1, int& op2, int& op3)
 {
-    command = (Com) my_stoi(s.substr(0, 5));
-    op1 = my_stoi(s.substr(5, 9));
-    op2 = my_stoi(s.substr(14, 9));
-    op3 = my_stoi(s.substr(23, 9));
+    command = (Com) stoi(s.substr(0, 5));
+    op1 = stoi(s.substr(5, 9));
+    op2 = stoi(s.substr(14, 9));
+    op3 = stoi(s.substr(23, 9));
 }
 
 long double Parser_UM_3::stold (string s)
@@ -89,13 +89,13 @@ long double Parser_UM_3::stold (string s)
         return 0;
 
     int sign = 1 - 2 * (s[0] - '0');     // при (int)s[0] = 48 sign = 1, а при 49 sign = -1
-    int E = my_stoi(s.substr(1, 8), 2);
-    int sub_Mantis = my_stoi('1' + s.substr(9, 23), 2);
+    int E = stoi(s.substr(1, 8), 2);
+    int sub_Mantis = stoi('1' + s.substr(9, 23), 2);
 
     return sign * ((long double)sub_Mantis * pow(2, E - 127 - 23));
 }
 
-string Parser_UM_3::ftos(float number)
+string Parser_UM_3::ftos(float number) // вещественное число 1.Mantis * 2 ^ (E - 127)
 {
     if (number == 0) return "00000000000000000000000000000000"; // 32 zero
 
@@ -114,12 +114,13 @@ string Parser_UM_3::ftos(float number)
         positive *= 2;
         degree--;
     }
+
     int E = 127 + degree;
 
     positive -= 1;  // приведение к виду 0.Mantis
     int Mantis = (int)(positive * pow(2, 23)); // приведение к виду Mantis
 
-    string answer = sign + my_itos(E, 8) + my_itos(Mantis, 23);
+    string answer = sign + itos(E, 8) + itos(Mantis, 23);
 
     return answer;
 }
