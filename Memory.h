@@ -5,7 +5,6 @@ class Memory
 {
 private:
     std::string mem_mas[512];
-
 public:
     Memory();
 

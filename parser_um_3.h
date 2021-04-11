@@ -6,6 +6,8 @@
 enum Command_code {
     ADDINT = 11,
     SUBINT = 12,
+    ADDREAL = 1,
+    SUBREAL = 2,
     SEND = 0,
     IF = 19,
     END = 31
@@ -21,19 +23,25 @@ private:
             {"SUBINT", SUBINT},
             {"SEND",   SEND},
             {"IF", IF},
-            {"END", END}
+            {"END", END},
+            {"ADDREAL", ADDREAL},
+            {"SUBREAL", SUBREAL}
     };
 
-    int com_check(std::string command);
+    int command_check (std::string command);
 
-    static std::string get_token(std::string& s);
+    static std::string get_token (std::string& s);
 
 public:
     static int my_stoi (std::string stroka, int origin_system = 2);
 
     static std::string my_itos (int value, int length = 32, int new_system = 2);
 
-    void get_punch_card(std::ifstream&, Memory* mem_obj);
+    void get_punch_card (std::ifstream&, Memory* mem_obj);
 
-    static void pars_of_cell(std::string& s, Com& command, int& op1, int& op2, int& op3);
+    static void pars_of_cell (std::string s, Com& command, int& op1, int& op2, int& op3);
+
+    static long double stold (std::string s); // string to long double
+
+    static std::string ftos (float number);    // float to string
 };

@@ -14,11 +14,19 @@ private:
 
     void omega_res(int res);
 
-    void omega_res(double res);
+    void omega_res(float res);
 
     void add_int(int op1, int op2, int op3);
 
     void sub_int(int op1, int op2, int op3);
+
+    void mul_int(int op1, int op2, int op3);
+
+    void div_int(int op1, int op2, int op3);
+
+    void add_real(int op1, int op2, int op3);
+
+    void sub_real(int op1, int op2, int op3);
 
     void send(int op1, int op3);
 

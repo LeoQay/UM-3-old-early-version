@@ -4,18 +4,18 @@ void Processor::omega_res(int res)
     {
         if (res == 0) omega = 0;
         else
-        if (res < 0) omega = 1;
-        else
-            omega = 2;
+            if (res < 0) omega = 1;
+            else
+                omega = 2;
     }
 
-void Processor::omega_res(double res)
+void Processor::omega_res(float res)
     {
         if (res == 0) omega = 0;
         else
-        if (res < 0) omega = 1;
-        else
-            omega = 2;
+            if (res < 0) omega = 1;
+            else
+                omega = 2;
     }
 
 Processor::Processor()
@@ -44,16 +44,49 @@ void Processor::output_memory(ofstream& fout)
 
 void Processor::add_int(int op1, int op2, int op3)
 {
-    int k1_res = Parser_UM_3::my_stoi(&mem_obj.get(op2)[0]) + Parser_UM_3::my_stoi(&mem_obj.get(op3)[0]);
-    omega_res(k1_res);
-    mem_obj.push(op1, Parser_UM_3::my_itos(k1_res));
+    int res = Parser_UM_3::my_stoi(&mem_obj.get(op2)[0]) + Parser_UM_3::my_stoi(&mem_obj.get(op3)[0]);
+    omega_res(res);
+    mem_obj.push(op1, Parser_UM_3::my_itos(res));
 }
 
 void Processor::sub_int(int op1, int op2, int op3)
 {
-    int k1_res = Parser_UM_3::my_stoi(mem_obj.get(op2)) - Parser_UM_3::my_stoi(mem_obj.get(op3));
-    omega_res(k1_res);
-    mem_obj.push(op1, Parser_UM_3::my_itos(k1_res));
+    int res = Parser_UM_3::my_stoi(mem_obj.get(op2))
+            - Parser_UM_3::my_stoi(mem_obj.get(op3));
+    omega_res(res);
+    mem_obj.push(op1, Parser_UM_3::my_itos(res));
+}
+
+void Processor::mul_int(int op1, int op2, int op3)
+{
+    int res = Parser_UM_3::my_stoi(mem_obj.get(op2))
+            * Parser_UM_3::my_stoi(mem_obj.get(op3));
+    omega_res(res);
+    mem_obj.push(op1, Parser_UM_3::my_itos(res));
+}
+
+void Processor::div_int(int op1, int op2, int op3)
+{
+    int res = Parser_UM_3::my_stoi(mem_obj.get(op2))
+            / Parser_UM_3::my_stoi(mem_obj.get(op3));
+    omega_res(res);
+    mem_obj.push(op1, Parser_UM_3::my_itos(res));
+}
+
+void Processor::add_real(int op1, int op2, int op3)
+{
+    float res = (float)(Parser_UM_3::stold(mem_obj.get(op2))
+                      + Parser_UM_3::stold(mem_obj.get(op3)));
+    omega_res(res);
+    mem_obj.push(op1, Parser_UM_3::ftos(res));
+}
+
+void Processor::sub_real(int op1, int op2, int op3)
+{
+    float res = (float)(Parser_UM_3::stold(mem_obj.get(op2))
+                      - Parser_UM_3::stold(mem_obj.get(op3)));
+    omega_res(res);
+    mem_obj.push(op1, Parser_UM_3::ftos(res));
 }
 
 void Processor::send(int op1, int op3)
@@ -98,6 +131,12 @@ bool Processor::tact()
             break;
         case Com::SUBINT:
             sub_int(op1, op2, op3);
+            break;
+        case Com::ADDREAL:
+            add_real(op1, op2, op3);
+            break;
+        case Com::SUBREAL:
+            sub_real(op1, op2, op3);
             break;
         case Com::SEND:
             send(op1, op3);
