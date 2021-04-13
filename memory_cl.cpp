@@ -1,4 +1,4 @@
-#include "memory_um3.h"
+#include "memory_cl.h"
 #include <iostream>
 
 Memory::Memory()

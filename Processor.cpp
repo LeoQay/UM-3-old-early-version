@@ -4,9 +4,9 @@ void Processor::omega_res(int res)
 {
     if (res == 0) omega = 0;
     else
-    if (res < 0) omega = 1;
-    else
-        omega = 2;
+        if (res < 0) omega = 1;
+        else
+            omega = 2;
 }
 
 void Processor::omega_res(float res)
@@ -24,10 +24,10 @@ Processor::Processor()
     Err = false;
     omega = 0;
     iterations = 0;
-    max_iterations = 10000;
+    max_iterations = -1;  /* если не установить максимальное число итераций, то never iterations == max_iterations*/
 }
 
-void Processor::input_punch_card(ifstream& fin)
+void Processor::input_punched_card(ifstream& fin)
 {
     pars_obj.get_punched_card(fin, &mem_obj);
 }
@@ -50,55 +50,96 @@ void Processor::input_int(int op1, int op2)
     while (op2-- > 0)
     {
         cin >> value;
-        mem_obj.push(op1++, Parser_UM_3::itos(value));
+        mem_obj.push(op1++, Parser::itos(value));
     }
 }
 
-void Processor::add_int(int op1, int op2, int op3)
+void Processor::output_int(int op1, int op2)
 {
-    int res = Parser_UM_3::stoi(&mem_obj.get(op2)[0]) + Parser_UM_3::stoi(&mem_obj.get(op3)[0]);
-    omega_res(res);
-    mem_obj.push(op1, Parser_UM_3::itos(res));
+    while(op2-- > 0)
+        cout << Parser::stoi(mem_obj.get(op1++)) << "\n";
 }
 
-void Processor::sub_int(int op1, int op2, int op3)
+void Processor::addInt(int op1, int op2, int op3)
 {
-    int res = Parser_UM_3::stoi(mem_obj.get(op2))
-              - Parser_UM_3::stoi(mem_obj.get(op3));
+    int res = Parser::stoi(&mem_obj.get(op2)[0])
+              + Parser::stoi(&mem_obj.get(op3)[0]);
     omega_res(res);
-    mem_obj.push(op1, Parser_UM_3::itos(res));
+    mem_obj.push(op1, Parser::itos(res));
 }
 
-void Processor::mul_int(int op1, int op2, int op3)
+void Processor::subInt(int op1, int op2, int op3)
 {
-    int res = Parser_UM_3::stoi(mem_obj.get(op2))
-              * Parser_UM_3::stoi(mem_obj.get(op3));
+    int res = Parser::stoi(mem_obj.get(op2))
+              - Parser::stoi(mem_obj.get(op3));
     omega_res(res);
-    mem_obj.push(op1, Parser_UM_3::itos(res));
+    mem_obj.push(op1, Parser::itos(res));
 }
 
-void Processor::div_int(int op1, int op2, int op3)
+void Processor::mulInt(int op1, int op2, int op3)
 {
-    int res = Parser_UM_3::stoi(mem_obj.get(op2))
-              / Parser_UM_3::stoi(mem_obj.get(op3));
+    int res = Parser::stoi(mem_obj.get(op2))
+              * Parser::stoi(mem_obj.get(op3));
     omega_res(res);
-    mem_obj.push(op1, Parser_UM_3::itos(res));
+    mem_obj.push(op1, Parser::itos(res));
 }
 
-void Processor::add_real(int op1, int op2, int op3)
+void Processor::divInt(int op1, int op2, int op3)
 {
-    float res = (float)(Parser_UM_3::stold(mem_obj.get(op2))
-                        + Parser_UM_3::stold(mem_obj.get(op3)));
+    int res = Parser::stoi(mem_obj.get(op2))
+              / Parser::stoi(mem_obj.get(op3));
     omega_res(res);
-    mem_obj.push(op1, Parser_UM_3::ftos(res));
+    mem_obj.push(op1, Parser::itos(res));
 }
 
-void Processor::sub_real(int op1, int op2, int op3)
+void Processor::modInt(int op1, int op2, int op3)
 {
-    float res = (float)(Parser_UM_3::stold(mem_obj.get(op2))
-                        - Parser_UM_3::stold(mem_obj.get(op3)));
+    int res = Parser::stoi(mem_obj.get(op2))
+              % Parser::stoi(mem_obj.get(op3));
     omega_res(res);
-    mem_obj.push(op1, Parser_UM_3::ftos(res));
+    mem_obj.push(op1, Parser::itos(res));
+}
+
+void Processor::input_float(int op1, int op2)
+{
+    float value;
+    while (op2-- > 0)
+    {
+        cin >> value;
+        mem_obj.push(op1++, Parser::ftos(value));
+    }
+}
+
+void Processor::output_float(int op1, int op2)
+{
+    while(op2-- > 0)
+        cout << (float)Parser::stold(mem_obj.get(op1++)) << "\n";
+}
+
+void Processor::addFloat(int op1, int op2, int op3)
+{
+    float res = (float)(Parser::stold(mem_obj.get(op2))
+                        + Parser::stold(mem_obj.get(op3)));
+    omega_res(res);
+    mem_obj.push(op1, Parser::ftos(res));
+}
+
+void Processor::subFloat(int op1, int op2, int op3)
+{
+    float res = (float)(Parser::stold(mem_obj.get(op2))
+                        - Parser::stold(mem_obj.get(op3)));
+    omega_res(res);
+    mem_obj.push(op1, Parser::ftos(res));
+}
+
+void Processor::intToFloat(int op1, int op3)
+{
+    mem_obj.push(op1, Parser::ftos((float)Parser::stoi(mem_obj.get(op3))));
+}
+
+void Processor::floatToInt(int op1, int op3)
+{
+    mem_obj.push(op1, Parser::itos((int)Parser::stold(mem_obj.get(op3))));
 }
 
 void Processor::unconditional(int op2)
@@ -139,30 +180,48 @@ bool Processor::tact()
 
     Com command;
     int op1, op2, op3;
-    Parser_UM_3::pars_of_cell(RK, command, op1, op2, op3);
+    Parser::pars_of_cell(RK, command, op1, op2, op3);
 
     switch (command)
     {
         case Com::ININT:
             input_int(op1, op2);
             break;
+        case Com::OUTINT:
+            output_int(op1, op2);
+            break;
         case Com::ADDINT:
-            add_int(op1, op2, op3);
+            addInt(op1, op2, op3);
             break;
         case Com::SUBINT:
-            sub_int(op1, op2, op3);
+            subInt(op1, op2, op3);
             break;
         case Com::MULINT:
-            mul_int(op1, op2, op3);
+            mulInt(op1, op2, op3);
             break;
         case Com::DIVINT:
-            div_int(op1, op2, op3);
+            divInt(op1, op2, op3);
             break;
-        case Com::ADDREAL:
-            add_real(op1, op2, op3);
+        case Com::MOD:
+            modInt(op1, op2, op3);
             break;
-        case Com::SUBREAL:
-            sub_real(op1, op2, op3);
+        case Com::INFLOAT:
+            input_float(op1, op2);
+            break;
+        case Com::OUTFLOAT:
+            output_float(op1, op2);
+            break;
+        case Com::ADDFLOAT:
+            addFloat(op1, op2, op3);
+            break;
+        case Com::SUBFLOAT:
+            subFloat(op1, op2, op3);
+            break;
+        case Com::ITOF:
+            intToFloat(op1, op3);
+            break;
+        case Com::FTOI:
+            floatToInt(op1, op3);
             break;
         case Com::UNCOND:
             unconditional(op2);
@@ -183,7 +242,7 @@ bool Processor::tact()
 
 void Processor::main_process()
 {
-    while (iterations++ < max_iterations && tact());
+    while (!Err && iterations++ != max_iterations && tact());
 }
 
 void Processor::set_max_iterations(int num)

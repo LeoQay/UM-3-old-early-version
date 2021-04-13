@@ -1,5 +1,6 @@
 #include <fstream>
 #include "Processor.h"
+
 int main()
 {
     Processor proc_obj;
@@ -7,7 +8,7 @@ int main()
     ifstream fin("punched_card.txt");
     ofstream fout("result.txt");
 
-    proc_obj.input_punch_card(fin);
+    proc_obj.input_punched_card(fin);
 
     proc_obj.main_process();
 

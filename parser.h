@@ -1,39 +1,53 @@
-#include "memory_um3.h"
+#include "memory_cl.h"
 #include <iostream>
 #include <fstream>
 #include <map>
 
 enum Command_code {
     ININT = 16,
+    OUTINT = 17,
     ADDINT = 11,
     SUBINT = 12,
     MULINT = 13,
     DIVINT = 14,
-    ADDREAL = 1,
-    SUBREAL = 2,
+    MOD = 15,
+    INFLOAT = 6,
+    OUTFLOAT = 7,
+    ADDFLOAT = 1,
+    SUBFLOAT = 2,
+    ITOF = 30,
+    FTOI = 10,
     UNCOND = 9,
     SEND = 0,
     IF = 19,
-    END = 31
+    END = 31,
+    FLOAT = 40
 };
 
 typedef Command_code Com;
 
-class Parser_UM_3
+class Parser
 {
 private:
     std::map <std::string, Command_code> m = {
-            {"ININT", ININT},
-            {"ADDINT", ADDINT},
-            {"SUBINT", SUBINT},
-            {"MULINT", MULINT},
-            {"DIVINT", DIVINT},
-            {"ADDREAL", ADDREAL},
-            {"SUBREAL", SUBREAL},
-            {"UNCOND", UNCOND},
-            {"SEND",   SEND},
-            {"IF", IF},
-            {"END", END}
+            {"ININT",    ININT},
+            {"OUTINT", OUTINT},
+            {"ADDINT",   ADDINT},
+            {"SUBINT",   SUBINT},
+            {"MULINT",   MULINT},
+            {"DIVINT",   DIVINT},
+            {"MOD", MOD},
+            {"INFLOAT", INFLOAT},
+            {"OUTFLOAT", OUTFLOAT},
+            {"ADDFLOAT", ADDFLOAT},
+            {"SUBFLOAT",  SUBFLOAT},
+            {"ITOF",     ITOF},
+            {"FTOI",     FTOI},
+            {"UNCOND",   UNCOND},
+            {"SEND",     SEND},
+            {"IF",       IF},
+            {"END",      END},
+            {"FLOAT", FLOAT}
     };
 
     int command_check (std::string command);

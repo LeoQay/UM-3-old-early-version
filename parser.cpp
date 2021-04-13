@@ -1,8 +1,8 @@
-#include "parser_um_3.h"
+#include "parser.h"
 #include <cmath>
 using namespace std;
 
-int Parser_UM_3::stoi (std::string stroka, int origin_system)
+int Parser::stoi (std::string stroka, int origin_system)
 {
     unsigned int num = 0, ten_sys, it = 0;
 
@@ -16,7 +16,7 @@ int Parser_UM_3::stoi (std::string stroka, int origin_system)
     return (signed int)num;
 }
 
-std::string Parser_UM_3::itos (int value, int length, int new_system)
+std::string Parser::itos (int value, int length, int new_system)
 {
     auto val = (unsigned int)value;
     string answer;
@@ -30,7 +30,7 @@ std::string Parser_UM_3::itos (int value, int length, int new_system)
     return answer;
 }
 
-int Parser_UM_3::command_check (string command)
+int Parser::command_check (string command)
 {
     if (isdigit(command[0]))
         return stoi(command, 10);
@@ -38,7 +38,7 @@ int Parser_UM_3::command_check (string command)
     return m[command];
 }
 
-string Parser_UM_3::get_token (string& s)
+string Parser::get_token (string& s)
 {
     string answer;
 
@@ -47,18 +47,18 @@ string Parser_UM_3::get_token (string& s)
     s.erase(0, iter);
 
     iter = 0;
-    while (s[iter] != ' ' && iter < s.size()) answer += s[iter++];
+    while (iter < s.size() && s[iter] != ' ') answer += s[iter++];
     s.erase(0, iter);
 
     return answer;
 }
 
-void Parser_UM_3::get_punched_card (ifstream &fin, Memory* mem_obj)
+void Parser::get_punched_card (ifstream &fin, Memory* mem_obj)
 {
     int position;
     while (!fin.eof())
     {
-        string s, result;
+        string s, result, buffer;
         getline(fin, s);
 
         //   номер ячейки
@@ -75,7 +75,7 @@ void Parser_UM_3::get_punched_card (ifstream &fin, Memory* mem_obj)
     }
 }
 
-void Parser_UM_3::pars_of_cell (string s, Com& command, int& op1, int& op2, int& op3)
+void Parser::pars_of_cell (string s, Com& command, int& op1, int& op2, int& op3)
 {
     command = (Com) stoi(s.substr(0, 5));
     op1 = stoi(s.substr(5, 9));
@@ -83,7 +83,7 @@ void Parser_UM_3::pars_of_cell (string s, Com& command, int& op1, int& op2, int&
     op3 = stoi(s.substr(23, 9));
 }
 
-long double Parser_UM_3::stold (string s)
+long double Parser::stold (string s)
 {
     if (s.substr(1, 31) == "0000000000000000000000000000000")  // 31 zero
         return 0;
@@ -95,7 +95,7 @@ long double Parser_UM_3::stold (string s)
     return sign * ((long double)sub_Mantis * pow(2, E - 127 - 23));
 }
 
-string Parser_UM_3::ftos(float number) // вещественное число 1.Mantis * 2 ^ (E - 127)
+string Parser::ftos(float number) // вещественное число 1.Mantis * 2 ^ (E - 127)
 {
     if (number == 0) return "00000000000000000000000000000000"; // 32 zero
 
