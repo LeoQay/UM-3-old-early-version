@@ -104,7 +104,7 @@ string Parser::ftos(float number) // вещественное число 1.Manti
     int degree = 0;
 
     // приведение к виду 1.Mantis * 2^degree
-    while (positive / 2 > 1)
+    while (positive / 2 >= 1)
     {
         positive /= 2;
         degree++;

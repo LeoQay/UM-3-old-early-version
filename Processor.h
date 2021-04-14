@@ -7,6 +7,9 @@ private:
     Memory mem_obj;
     Parser pars_obj;
 
+    string R1;           /* первый регистр АЛУ */
+    string R2;           /* второй регистр АЛУ */
+    string S;            /* регистр сумматора (хранит результат) */
     int RA;              /* счетчик адреса, содержит адрес следующей команды  */
     bool Err;            /* регистр ошибок, true - произошла ошибка  */
     string RK;           /* текущая команда  */
@@ -39,6 +42,10 @@ private:
     void addFloat(int op1, int op2, int op3);
 
     void subFloat(int op1, int op2, int op3);
+
+    void mulFloat(int op1, int op2, int op3);
+
+    void divFloat(int op1, int op2, int op3);
 
     void intToFloat(int op1, int op3);
 
