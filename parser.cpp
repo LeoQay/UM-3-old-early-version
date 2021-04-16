@@ -1,10 +1,106 @@
 #include "parser.h"
 #include <cmath>
+#include "Exceptions.h"
 using namespace std;
+
+int Parser::command_check (string command)
+{
+    if (isdigit(command[0]))
+    {
+        int iter = 0;
+        while (isdigit(command[iter]) && iter < command.length()) iter++;
+
+        if (iter == command.length())
+            return stoi(command, 10);
+        else
+            throw Bad_command(command);
+    }
+
+    if (m.find(command) == m.end()) throw Bad_command(command);
+
+    return m[command];
+}
+
+string Parser::get_token (string& s)
+{
+    string answer;
+
+    int iter = 0;
+    while (s[iter] == ' ' && iter < s.length()) iter++;
+
+    if (iter == s.length()) return "EMPTY";
+
+    s.erase(0, iter);
+
+    iter = 0;
+    while (iter < s.size() && s[iter] != ' ') answer += s[iter++];
+    s.erase(0, iter);
+
+    return answer;
+}
+
+void Parser::get_punched_card (ifstream &fin, Memory* mem_obj)
+{
+    while (!fin.eof())
+    {
+        int position;
+        int i;
+        string s, result, buffer;
+        getline(fin, s);
+
+        //   номер ячейки
+        if ((buffer = get_token(s)) == "EMPTY")
+            throw Empty("Empty number of cell!");
+
+        /*i = 0;
+        while (isdigit(buffer[i]) && i < buffer.length()) i++;
+        if (i != buffer.length())*/
+
+        position = stoi(buffer, 10);
+        if (position >= 512 || position <= -1) throw Out_range(position);
+
+        //   команда
+        if ((buffer = get_token(s)) == "EMPTY")
+            throw Empty("Empty command!");
+
+        result += itos(command_check(buffer), 5);
+
+        // op1, op2, op3
+        for (int i = 0; i < 3; i++)
+        {
+            string ans = "Empty op";
+            if ((buffer = get_token(s)) == "EMPTY")
+                throw Empty(ans + char('1' + i));
+
+            int token_val = stoi(buffer, 10);
+
+            if (token_val >= 512 || token_val <= -1) throw Out_range(token_val);
+
+            result += itos(token_val, 9);
+        }
+
+        (*mem_obj).push(position, result);
+    }
+}
+
+void Parser::pars_of_cell (string& s, Com& command, int& op1, int& op2, int& op3)
+{
+    command = (Com) stoi(s.substr(0, 5));
+    op1 = stoi(s.substr(5, 9));
+    op2 = stoi(s.substr(14, 9));
+    op3 = stoi(s.substr(23, 9));
+}
 
 int Parser::stoi (std::string stroka, int origin_system)
 {
     unsigned int num = 0, ten_sys, it = 0;
+    int sign = 1;
+
+    if (stroka[0] == '-')
+    {
+        sign = -1;
+        stroka.erase(0, 1);
+    }
 
     while (it < stroka.size())
     {
@@ -13,7 +109,7 @@ int Parser::stoi (std::string stroka, int origin_system)
         it++;
     }
 
-    return (signed int)num;
+    return (signed int)num * sign;
 }
 
 std::string Parser::itos (int value, int length, int new_system)
@@ -30,59 +126,6 @@ std::string Parser::itos (int value, int length, int new_system)
     return answer;
 }
 
-int Parser::command_check (string command)
-{
-    if (isdigit(command[0]))
-        return stoi(command, 10);
-
-    return m[command];
-}
-
-string Parser::get_token (string& s)
-{
-    string answer;
-
-    int iter = 0;
-    while (s[iter] == ' ') iter++;
-    s.erase(0, iter);
-
-    iter = 0;
-    while (iter < s.size() && s[iter] != ' ') answer += s[iter++];
-    s.erase(0, iter);
-
-    return answer;
-}
-
-void Parser::get_punched_card (ifstream &fin, Memory* mem_obj)
-{
-    int position;
-    while (!fin.eof())
-    {
-        string s, result, buffer;
-        getline(fin, s);
-
-        //   номер ячейки
-        position = stoi(get_token(s), 10);
-
-        //   команда
-        result += itos(command_check(get_token(s)), 5);
-
-        // op1, op2, op3
-        for (int i = 0; i < 3; i++)
-            result += itos(stoi(get_token(s), 10), 9);
-
-        (*mem_obj).push(position, result);
-    }
-}
-
-void Parser::pars_of_cell (string s, Com& command, int& op1, int& op2, int& op3)
-{
-    command = (Com) stoi(s.substr(0, 5));
-    op1 = stoi(s.substr(5, 9));
-    op2 = stoi(s.substr(14, 9));
-    op3 = stoi(s.substr(23, 9));
-}
-
 long double Parser::stold (string s)
 {
     if (s.substr(1, 31) == "0000000000000000000000000000000")  // 31 zero
@@ -95,7 +138,7 @@ long double Parser::stold (string s)
     return sign * ((long double)sub_Mantis * pow(2, E - 127 - 23));
 }
 
-string Parser::ftos(float number) // вещественное число 1.Mantis * 2 ^ (E - 127)
+string Parser::ftos(float number) /* вещественное число 1.Mantis * (2 ^ (E - 127)) */
 {
     if (number == 0) return "00000000000000000000000000000000"; // 32 zero
 

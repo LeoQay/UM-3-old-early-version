@@ -65,7 +65,7 @@ public:
 
     void get_punched_card (std::ifstream &fin, Memory* mem_obj);
 
-    static void pars_of_cell (std::string s, Com& command, int& op1, int& op2, int& op3);
+    static void pars_of_cell (std::string& s, Com& command, int& op1, int& op2, int& op3);
 
     static long double stold (std::string s); // string to long double
 

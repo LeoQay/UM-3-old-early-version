@@ -1,4 +1,5 @@
 #include "Processor.h"
+#include "Exceptions.h"
 
 void Processor::omega_res(int res)
 {

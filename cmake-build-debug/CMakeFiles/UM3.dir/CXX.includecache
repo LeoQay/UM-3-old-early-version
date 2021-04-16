@@ -1,0 +1,36 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/Leo/CLionProjects/UM3/Exceptions.h
+iostream
+-
+
+C:/Users/Leo/CLionProjects/UM3/memory_cl.h
+iostream
+-
+fstream
+-
+
+C:/Users/Leo/CLionProjects/UM3/parser.cpp
+parser.h
+C:/Users/Leo/CLionProjects/UM3/parser.h
+cmath
+-
+Exceptions.h
+C:/Users/Leo/CLionProjects/UM3/Exceptions.h
+
+C:/Users/Leo/CLionProjects/UM3/parser.h
+memory_cl.h
+C:/Users/Leo/CLionProjects/UM3/memory_cl.h
+iostream
+-
+fstream
+-
+map
+-
+

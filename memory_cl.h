@@ -4,6 +4,7 @@
 class Memory
 {
 private:
+    int mem_size = 512;
     std::string mem_mas[512];
 public:
     Memory();
