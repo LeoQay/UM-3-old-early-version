@@ -1,9 +1,11 @@
+#pragma once
 #include "parser.h"
-#include <cmath>
 #include "Exceptions.h"
+
+#include <cmath>
 using namespace std;
 
-int Parser::command_check (string command)
+int Parser::command_check (string command, int num)
 {
     if (isdigit(command[0]))
     {
@@ -13,22 +15,22 @@ int Parser::command_check (string command)
         if (iter == command.length())
             return stoi(command, 10);
         else
-            throw Bad_command(command);
+            throw Bad_token(num, command);
     }
 
-    if (m.find(command) == m.end()) throw Bad_command(command);
+    if (m.find(command) == m.end()) throw Bad_token(num, command);
 
     return m[command];
 }
 
-string Parser::get_token (string& s)
+string Parser::get_token (string& s, int num)
 {
     string answer;
 
     int iter = 0;
     while (s[iter] == ' ' && iter < s.length()) iter++;
 
-    if (iter == s.length()) return "EMPTY";
+    if (iter == s.length()) throw Empty(num, "Empty");
 
     s.erase(0, iter);
 
@@ -41,40 +43,44 @@ string Parser::get_token (string& s)
 
 void Parser::get_punched_card (ifstream &fin, Memory* mem_obj)
 {
+    int number_cell = 0;
     while (!fin.eof())
     {
+        number_cell++;
         int position;
-        int i;
         string s, result, buffer;
         getline(fin, s);
 
         //   номер ячейки
-        if ((buffer = get_token(s)) == "EMPTY")
-            throw Empty("Empty number of cell!");
+        try{ buffer = get_token(s, number_cell); }
+        catch (Empty&) { throw Empty(number_cell, "Empty number!");}
 
-        /*i = 0;
-        while (isdigit(buffer[i]) && i < buffer.length()) i++;
-        if (i != buffer.length())*/
+        if (!number(buffer)) throw Bad_token(number_cell, buffer);
 
         position = stoi(buffer, 10);
-        if (position >= 512 || position <= -1) throw Out_range(position);
+        if (position >= 512 || position <= -1) throw Out_range(number_cell, position);
 
         //   команда
-        if ((buffer = get_token(s)) == "EMPTY")
-            throw Empty("Empty command!");
+        try{ buffer = get_token(s, number_cell); }
+        catch (Exceptions&) { throw Empty(number_cell, "Empty command!");}
 
-        result += itos(command_check(buffer), 5);
+        result += itos(command_check(buffer, number_cell), 5);
 
         // op1, op2, op3
         for (int i = 0; i < 3; i++)
         {
-            string ans = "Empty op";
-            if ((buffer = get_token(s)) == "EMPTY")
-                throw Empty(ans + char('1' + i));
+            string opi = "op";
+            opi += char('1' + i);
+
+            try{ buffer = get_token(s, number_cell); }
+            catch (Empty&) { throw Empty(number_cell, "Empty " + opi + "!"); }
+
+            if (!number(buffer)) throw Bad_token(number_cell, buffer);
 
             int token_val = stoi(buffer, 10);
 
-            if (token_val >= 512 || token_val <= -1) throw Out_range(token_val);
+            if (token_val >= 512 || token_val <= -1)
+                throw Out_range(number_cell, token_val, "Out range " + opi + "!");
 
             result += itos(token_val, 9);
         }
@@ -83,9 +89,17 @@ void Parser::get_punched_card (ifstream &fin, Memory* mem_obj)
     }
 }
 
-void Parser::pars_of_cell (string& s, Com& command, int& op1, int& op2, int& op3)
+bool Parser::number(string& s)
 {
-    command = (Com) stoi(s.substr(0, 5));
+    int i = 0;
+    while (((i == 0 && s[0] == '-') || isdigit(s[i])) && i < s.length()) i++;
+
+    return i == s.length();
+}
+
+void Parser::pars_of_cell (string& s, Command_code& command, int& op1, int& op2, int& op3)
+{
+    command = (Command_code) stoi(s.substr(0, 5));
     op1 = stoi(s.substr(5, 9));
     op2 = stoi(s.substr(14, 9));
     op3 = stoi(s.substr(23, 9));

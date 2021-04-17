@@ -7,6 +7,8 @@
 #IncludeRegexTransform: 
 
 C:/Users/Leo/CLionProjects/UM3/Exceptions.h
+parser.h
+C:/Users/Leo/CLionProjects/UM3/parser.h
 iostream
 -
 
@@ -19,10 +21,10 @@ fstream
 C:/Users/Leo/CLionProjects/UM3/parser.cpp
 parser.h
 C:/Users/Leo/CLionProjects/UM3/parser.h
-cmath
--
 Exceptions.h
 C:/Users/Leo/CLionProjects/UM3/Exceptions.h
+cmath
+-
 
 C:/Users/Leo/CLionProjects/UM3/parser.h
 memory_cl.h

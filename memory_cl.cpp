@@ -1,6 +1,7 @@
+#pragma once
 #include "memory_cl.h"
+
 #include <iostream>
-#include "Exceptions.h"
 
 Memory::Memory()
 {

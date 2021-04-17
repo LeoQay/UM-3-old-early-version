@@ -1,4 +1,6 @@
+#pragma once
 #include "memory_cl.h"
+
 #include <iostream>
 #include <fstream>
 #include <map>
@@ -26,8 +28,6 @@ enum Command_code {
     FLOAT = 40
 };
 
-typedef Command_code Com;
-
 class Parser
 {
 private:
@@ -54,9 +54,9 @@ private:
             {"FLOAT", FLOAT}
     };
 
-    int command_check (std::string command);
+    int command_check (std::string command, int num);
 
-    static std::string get_token (std::string& s);
+    static std::string get_token (std::string& s, int num);
 
 public:
     static int stoi (std::string stroka, int origin_system = 2);   // string to integer
@@ -65,7 +65,9 @@ public:
 
     void get_punched_card (std::ifstream &fin, Memory* mem_obj);
 
-    static void pars_of_cell (std::string& s, Com& command, int& op1, int& op2, int& op3);
+    static bool number (std::string& s);
+
+    static void pars_of_cell (std::string& s, Command_code& command, int& op1, int& op2, int& op3);
 
     static long double stold (std::string s); // string to long double
 

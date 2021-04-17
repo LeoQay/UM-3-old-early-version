@@ -1,6 +1,7 @@
+#pragma once
 #include "Processor.h"
 #include "Exceptions.h"
-#include "SFML/Window.hpp"
+//#include "SFML/Window.hpp"
 
 #include <fstream>
 
@@ -9,36 +10,49 @@ int main()
     ifstream fin("punched_card.txt");
     ofstream fout("result.txt");
 
-    try
-    {
-        Processor proc_obj;
+    Processor proc_obj;
 
+    try {
         proc_obj.input_punched_card(fin);
-
-        proc_obj.main_process();
-
-        proc_obj.output_memory(fout);
-
-        proc_obj.clear_memory();
     }
 
     catch (Out_range& err)
     {
-        cout << err.message << " " << err.bad_index;
+        cout << "Error in the line " << err.cell_number << "\n" << err.what();
         return 1;
     }
 
-    catch (Bad_command& err)
+    catch (Bad_token& err)
     {
-        cout << err.message << " " << err.what_is;
-        return 2;
+        cout << "Error in the line " << err.cell_number << "\n" << err.what();
+        return 1;
     }
 
     catch (Empty& err)
     {
-        cout << err.message;
-        return 3;
+        cout << "Error in the line " << err.cell_number << "\n" << err.what();
+        return 1;
     }
+
+    try{
+        proc_obj.main_process();
+    }
+
+    catch (Bad_command& err)
+    {
+        cout << "Error in the cell " << err.cell_number << "\n" << err.what() << "\n";
+        return 1;
+    }
+
+    catch (NULL_DIVIDE& err)
+    {
+        cout << "Error in the cell " << err.cell_number << "\n" << err.what() << "\n";
+        return 1;
+    }
+
+    proc_obj.output_memory(fout);
+
+    proc_obj.clear_memory();
 
     fin.close();
     fout.close();

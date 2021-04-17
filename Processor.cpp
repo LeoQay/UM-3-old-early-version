@@ -1,3 +1,4 @@
+#pragma once
 #include "Processor.h"
 #include "Exceptions.h"
 
@@ -22,6 +23,7 @@ void Processor::omega_res(float res)
 Processor::Processor()
 {
     RA = 1;
+    saveRA = 1;
     Err = false;
     omega = 0;
     iterations = 0;
@@ -53,7 +55,8 @@ void Processor::input_int(int op1, int op2)
     while (op2-- > 0)
     {
         cin >> value;
-        mem_obj.push(op1++, Parser::itos(value));
+        mem_obj.push(op1, Parser::itos(value));
+        op1 = (op1 + 1) % 512;
     }
 }
 
@@ -97,7 +100,10 @@ void Processor::divInt(int op1, int op2, int op3)
 {
     R1 = mem_obj.get(op2);
     R2 = mem_obj.get(op3);
-    int res = Parser::stoi(R1) / Parser::stoi(R2);
+    int I1 = Parser::stoi(R1);
+    int I2 = Parser::stoi(R2);
+    if (I2 == 0) throw NULL_DIVIDE(saveRA, (int)Command_code::DIVINT, op1, op2, op3);
+    int res = I1 / I2;
     omega_res(res);
     S = Parser::itos(res);
     mem_obj.push(op1, S);
@@ -107,7 +113,10 @@ void Processor::modInt(int op1, int op2, int op3)
 {
     R1 = mem_obj.get(op2);
     R2 = mem_obj.get(op3);
-    int res = Parser::stoi(R1) % Parser::stoi(R2);
+    int I1 = Parser::stoi(R1);
+    int I2 = Parser::stoi(R2);
+    if (I2 == 0) throw NULL_DIVIDE(saveRA, (int)Command_code::DIVINT, op1, op2, op3);
+    int res = I1 % I2;
     omega_res(res);
     S = Parser::itos(res);
     mem_obj.push(op1, S);
@@ -119,7 +128,8 @@ void Processor::input_float(int op1, int op2)
     while (op2-- > 0)
     {
         cin >> value;
-        mem_obj.push(op1++, Parser::ftos(value));
+        mem_obj.push(op1, Parser::ftos(value));
+        op1 = (op1 + 1) % 512;
     }
 }
 
@@ -163,7 +173,10 @@ void Processor::divFloat(int op1, int op2, int op3)
 {
     R1 = mem_obj.get(op2);
     R2 = mem_obj.get(op3);
-    float res = (float)(Parser::stold(R1) / Parser::stold(R2));
+    long double I1 = Parser::stold(R1);
+    long double I2 = Parser::stold(R2);
+    if (I2 == 0) throw NULL_DIVIDE(saveRA, (int)Command_code::DIVFLOAT, op1, op2, op3);
+    float res = (float)(I1 / I2);
     omega_res(res);
     S = Parser::ftos(res);
     mem_obj.push(op1, S);
@@ -213,72 +226,73 @@ void Processor::clear_memory()
 bool Processor::tact()
 {
     RK = mem_obj.get(RA);
+    saveRA = RA;
     RA = (RA + 1) % 512;
 
-    Com command;
+    Command_code command;
     int op1, op2, op3;
     Parser::pars_of_cell(RK, command, op1, op2, op3);
 
     switch (command)
     {
-        case Com::ININT:
+        case Command_code::ININT:
             input_int(op1, op2);
             break;
-        case Com::OUTINT:
+        case Command_code::OUTINT:
             output_int(op1, op2);
             break;
-        case Com::ADDINT:
+        case Command_code::ADDINT:
             addInt(op1, op2, op3);
             break;
-        case Com::SUBINT:
+        case Command_code::SUBINT:
             subInt(op1, op2, op3);
             break;
-        case Com::MULINT:
+        case Command_code::MULINT:
             mulInt(op1, op2, op3);
             break;
-        case Com::DIVINT:
+        case Command_code::DIVINT:
             divInt(op1, op2, op3);
             break;
-        case Com::MOD:
+        case Command_code::MOD:
             modInt(op1, op2, op3);
             break;
-        case Com::INFLOAT:
+        case Command_code::INFLOAT:
             input_float(op1, op2);
             break;
-        case Com::OUTFLOAT:
+        case Command_code::OUTFLOAT:
             output_float(op1, op2);
             break;
-        case Com::ADDFLOAT:
+        case Command_code::ADDFLOAT:
             addFloat(op1, op2, op3);
             break;
-        case Com::SUBFLOAT:
+        case Command_code::SUBFLOAT:
             subFloat(op1, op2, op3);
             break;
-        case Com::MULFLOAT:
+        case Command_code::MULFLOAT:
             mulFloat(op1, op2, op3);
             break;
-        case Com::DIVFLOAT:
+        case Command_code::DIVFLOAT:
             divFloat(op1, op2, op3);
             break;
-        case Com::ITOF:
+        case Command_code::ITOF:
             intToFloat(op1, op3);
             break;
-        case Com::FTOI:
+        case Command_code::FTOI:
             floatToInt(op1, op3);
             break;
-        case Com::UNCOND:
+        case Command_code::UNCOND:
             unconditional(op2);
             break;
-        case Com::SEND:
+        case Command_code::SEND:
             send(op1, op3);
             break;
-        case Com::IF:
+        case Command_code::IF:
             just_if(op1, op2, op3);
             break;
-        case Com::END:
+        case Command_code::END:
             return false;
         default:
-            return false;
+            throw Bad_command(saveRA, (int)command, op1, op2, op3);
     }
     return true;
 }

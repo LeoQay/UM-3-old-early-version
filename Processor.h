@@ -1,4 +1,6 @@
+#pragma once
 #include "parser.h"
+
 using namespace std;
 
 class Processor
@@ -16,6 +18,7 @@ private:
     int omega;           /* 0 - результат равен 0, 1 - меньше 0, 2 - больше 0  */
     int iterations;
     int max_iterations;  /* не канонично, по умолчанию игнорируется */
+    int saveRA;
 
     void omega_res(int res);
 
