@@ -56,9 +56,21 @@ private:
 
     void unconditional(int op2);
 
-    void send(int op1, int op3);
+    void PR (int op2);
+
+    void PNR (int op2);
+
+    void PB (int op2);
+
+    void PM (int op2);
+
+    void PBR (int op2);
+
+    void PMR (int op2);
 
     void just_if(int op1, int op2, int op3);
+
+    void send(int op1, int op3);
 
     bool tact();
 
@@ -76,4 +88,6 @@ public:
     void set_max_iterations(int num);
 
     void main_process();
+
+    string  output_stat();
 };

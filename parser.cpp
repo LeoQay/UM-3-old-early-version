@@ -13,12 +13,18 @@ int Parser::command_check (string command, int num)
         while (isdigit(command[iter]) && iter < command.length()) iter++;
 
         if (iter == command.length())
-            return stoi(command, 10);
+        {
+            int answer = stoi(command, 10);
+            if (answer >= 0 && answer <= 31)
+                return answer;
+            else
+                throw IndexOutRange(num, answer, "Out range of command!");
+        }
         else
-            throw Bad_token(num, command);
+            throw Bad_token(num, command, "Bad token of command!");
     }
 
-    if (m.find(command) == m.end()) throw Bad_token(num, command);
+    if (m.find(command) == m.end()) throw Bad_token(num, command, "Bad token of command!");
 
     return m[command];
 }
@@ -55,10 +61,12 @@ void Parser::get_punched_card (ifstream &fin, Memory* mem_obj)
         try{ buffer = get_token(s, number_cell); }
         catch (Empty&) { throw Empty(number_cell, "Empty number!");}
 
+        if (buffer.length() > 3) throw Bad_token(number_cell, buffer, "Too long token of cell number!");
+
         if (!number(buffer)) throw Bad_token(number_cell, buffer);
 
         position = stoi(buffer, 10);
-        if (position >= 512 || position <= -1) throw Out_range(number_cell, position);
+        if (position >= 512 || position <= -1) throw IndexOutRange(number_cell, position);
 
         //   команда
         try{ buffer = get_token(s, number_cell); }
@@ -75,12 +83,12 @@ void Parser::get_punched_card (ifstream &fin, Memory* mem_obj)
             try{ buffer = get_token(s, number_cell); }
             catch (Empty&) { throw Empty(number_cell, "Empty " + opi + "!"); }
 
-            if (!number(buffer)) throw Bad_token(number_cell, buffer);
+            if (!number(buffer)) throw Bad_token(number_cell, buffer, "Bad token of " + opi + "!");
 
             int token_val = stoi(buffer, 10);
 
             if (token_val >= 512 || token_val <= -1)
-                throw Out_range(number_cell, token_val, "Out range " + opi + "!");
+                throw IndexOutRange(number_cell, token_val, "Index out range " + opi + "!");
 
             result += itos(token_val, 9);
         }

@@ -16,21 +16,24 @@ int main()
         proc_obj.input_punched_card(fin);
     }
 
-    catch (Out_range& err)
+    catch (IndexOutRange& err)
     {
-        cout << "Error in the line " << err.cell_number << "\n" << err.what();
+        cout << "Error in the line " << err.cell_number << "\n" << err.what() << "\n\n";
+        cout << proc_obj.output_stat();
         return 1;
     }
 
     catch (Bad_token& err)
     {
-        cout << "Error in the line " << err.cell_number << "\n" << err.what();
+        cout << "Error in the line " << err.cell_number << "\n" << err.what() << "\n\n";
+        cout << proc_obj.output_stat();
         return 1;
     }
 
     catch (Empty& err)
     {
-        cout << "Error in the line " << err.cell_number << "\n" << err.what();
+        cout << "Error in the line " << err.cell_number << "\n" << err.what() << "\n\n";
+        cout << proc_obj.output_stat();
         return 1;
     }
 
@@ -40,13 +43,22 @@ int main()
 
     catch (Bad_command& err)
     {
-        cout << "Error in the cell " << err.cell_number << "\n" << err.what() << "\n";
+        cout << "Error in the cell " << err.cell_number << "\n" << err.what() << "\n\n";
+        cout << proc_obj.output_stat();
         return 1;
     }
 
     catch (NULL_DIVIDE& err)
     {
-        cout << "Error in the cell " << err.cell_number << "\n" << err.what() << "\n";
+        cout << "Error in the cell " << err.cell_number << "\n" << err.what() << "\n\n";
+        cout << proc_obj.output_stat();
+        return 1;
+    }
+
+    catch (MathOutRange& err)
+    {
+        cout << "Error in the cell " << err.cell_number << "\n" << err.what() << "\n\n";
+        cout << proc_obj.output_stat();
         return 1;
     }
 

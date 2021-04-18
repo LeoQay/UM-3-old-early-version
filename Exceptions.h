@@ -3,6 +3,7 @@
 #include "parser.h"
 
 #include <iostream>
+#include <sstream>
 
 class Exceptions : std::exception
 {
@@ -19,42 +20,44 @@ public:
     }
 };
 
-class Bad_cell : public Exceptions
+class ParserException : public Exceptions
 {
 public:
-    explicit Bad_cell (int num, std::string message = "Bad cell!") : Exceptions(num, move(message)) {};
+    explicit ParserException (int num, std::string message = "Bad cell!") : Exceptions(num, move(message)) {};
 };
 
-class Empty : public Bad_cell
+class Empty : public ParserException
 {
 public:
-    explicit Empty(int num, std::string message) : Bad_cell(num, move(message)) {};
+    explicit Empty(int num, std::string message) : ParserException(num, move(message)) {};
 };
 
-class Out_range : public Bad_cell
+class IndexOutRange : public ParserException
 {
 private:
     int bad_index;
 public:
-    explicit Out_range(int num, int bad_index, std::string message = "Out range!") :
-    Bad_cell(num, move(message)), bad_index(bad_index) {};
+    explicit IndexOutRange(int num, int bad_index, std::string message = "Out range!") :
+            ParserException(num, move(message)), bad_index(bad_index) {};
 
     const char* what()
     {
         auto s = new std::string;
         *s = Exceptions::what();
-        *s += (" " + Parser::itos(bad_index, 3, 10));
+        std::ostringstream oss;
+        oss << bad_index;
+        *s += (" " + oss.str());
         return (*s).c_str();
     }
 };
 
-class Bad_token : public Bad_cell
+class Bad_token : public ParserException
 {
 private:
     std::string token;
 public:
     explicit Bad_token(int num, std::string token, std::string message = "Bad token!") :
-    Bad_cell(num, move(message)), token(move(token)) {};
+            ParserException(num, move(message)), token(move(token)) {};
 
     const char* what()
     {
@@ -80,11 +83,10 @@ public:
     {
         auto s = new std::string;
         *s = Exceptions::what();
-
-        *s += (" " + Parser::itos(err_com, 2, 10));
-        *s += (" " + Parser::itos(op1, 3, 10));
-        *s += (" " + Parser::itos(op2, 3, 10));
-        *s += (" " + Parser::itos(op3, 3, 10));
+        *s += "\nCell:";
+        std::ostringstream oss;
+        oss << " " << err_com << " " << op1 << " " << op2 << " " << op3;
+        (*s) += oss.str();
         return (*s).c_str();
     }
 };
@@ -99,8 +101,47 @@ public:
 class MathException : public ProcessorException
 {
 public:
+    int iop2;
+    int iop3;
+    float fop2;
+    float fop3;
+
     MathException (int num, int err_com, int op1, int op2, int op3, std::string message = "Math error!") :
-    ProcessorException(num, err_com, op1, op2, op3, move(message)) {};
+                   ProcessorException(num, err_com, op1, op2, op3, move(message)),
+                   iop2(1), iop3(1), fop2(1), fop3(1) {};
+
+    MathException (int num, int err_com, int op1, int op2, int op3,
+                   int iop2, int iop3, std::string message = "Math error!") :
+                   ProcessorException(num, err_com, op1, op2, op3, move(message)),
+                   iop2(iop2), iop3(iop3), fop2(1), fop3(1) {};
+
+    MathException (int num, int err_com, int op1, int op2, int op3,
+                   float fop2, float fop3, std::string message = "Math error!") :
+                   ProcessorException(num, err_com, op1, op2, op3, move(message)),
+                   fop2(fop2), fop3(fop3), iop2(1), iop3(1) {};
+
+    const char* what ()
+    {
+        auto s = new std::string;
+        *s = ProcessorException::what();
+
+        if (iop2 == 1 && iop3 == 1 && fop2 == 1 && fop3 == 1)
+            return (*s).c_str();
+        else
+            if (iop2 == 1 && iop3 == 1)
+            {
+                std::ostringstream oss;
+                oss << "\nfloat: op2 = " << fop2 << ", op3 = " << fop3;
+                *s += oss.str();
+                return (*s).c_str();
+            }else
+            {
+                std::ostringstream oss;
+                oss << "\nint: op2 = " << iop2 << ", op3 = " << iop3;
+                *s += oss.str();
+                return (*s).c_str();
+            }
+    }
 };
 
 class NULL_DIVIDE : public MathException
@@ -108,4 +149,22 @@ class NULL_DIVIDE : public MathException
 public:
     NULL_DIVIDE (int num, int err_com, int op1, int op2, int op3, std::string message = "Dividing by zero is bad!") :
     MathException(num, err_com, op1, op2, op3, move(message)) {};
+};
+
+class MathOutRange : public MathException
+{
+public:
+    // простой ответ
+    MathOutRange (int num, int err_com, int op1, int op2, int op3, std::string message = "Math out range!") :
+                  MathException(num, err_com, op1, op2, op3, move(message)) {};
+
+    // ответ для операций с целыми
+    MathOutRange (int num, int err_com, int op1, int op2, int op3,
+                  int iop2, int iop3, std::string message = "Math out range!") :
+                  MathException(num, err_com, op1, op2, op3, iop2, iop3, move(message)) {};
+
+    // ответ для операций с вещественными
+    MathOutRange (int num, int err_com, int op1, int op2, int op3,
+                  float fop2, float fop3, std::string message = "Math out range!") :
+                  MathException(num, err_com, op1, op2, op3, fop2, fop3, move(message)) {};
 };
