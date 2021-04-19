@@ -30,8 +30,7 @@ enum Command_code {
     PMR = 25,
     IF = 19,
     SEND = 0,
-    END = 31,
-    FLOAT = 40
+    END = 31
 };
 
 class Parser
@@ -60,10 +59,9 @@ private:
             {"PM", PM},
             {"PBR", PBR},
             {"PMR", PMR},
-            {"SEND",     SEND},
-            {"IF",       IF},
-            {"END",      END},
-            {"FLOAT", FLOAT}
+            {"SEND", SEND},
+            {"IF", IF},
+            {"END", END}
     };
 
     int command_check (std::string command, int num);
@@ -77,7 +75,7 @@ public:
 
     void get_punched_card (std::ifstream &fin, Memory* mem_obj);
 
-    static bool number (std::string& s);
+    static bool number (std::string& s); // true, еслм в строке целое число
 
     static void pars_of_cell (std::string& s, Command_code& command, int& op1, int& op2, int& op3);
 

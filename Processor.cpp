@@ -257,7 +257,15 @@ void Processor::intToFloat (int op1, int op3)
 
 void Processor::floatToInt (int op1, int op3)
 {
-    mem_obj.push(op1, Parser::itos((int)Parser::stold(mem_obj.get(op3))));
+    long double F = Parser::stold(mem_obj.get(op3));
+
+    if (F < -2147483648 || F > 2147483647)
+    {
+        Err = true;
+        throw FTOIOutRange(saveRA, (int)Command_code::FTOI, op1, op3, F);
+    }
+
+    mem_obj.push(op1, Parser::itos((int)F));
 }
 
 void Processor::unconditional (int op2) { RA = op2; }
