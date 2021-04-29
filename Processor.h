@@ -11,71 +11,88 @@ private:
 
     string R1;           /* первый регистр АЛУ */
     string R2;           /* второй регистр АЛУ */
+    int I1, I2;          // регистры АЛУ для целых
+    long double F1, F2;  // регистры АЛУ для вещественных
     string S;            /* регистр сумматора (хранит результат) */
     int RA;              /* счетчик адреса, содержит адрес следующей команды  */
     bool Err;            /* регистр ошибок, true - произошла ошибка  */
     string RK;           /* текущая команда  */
+    int op1, op2, op3;   // current operands
     int omega;           /* 0 - результат равен 0, 1 - меньше 0, 2 - больше 0  */
     int iterations;
     int max_iterations;  /* не канонично, по умолчанию игнорируется */
     int saveRA;
+    long long maxInt;
+    long long minInt;
+    long double maxFloat;
+    long double minFloat;
 
     void omega_res(int res);
 
     void omega_res(float res);
 
-    void input_int(int op1, int op2);
+    void inInt();
 
-    void output_int(int op1, int op2);
+    void outInt();
 
-    void addInt(int op1, int op2, int op3);
+    void addInt();
 
-    void subInt(int op1, int op2, int op3);
+    void subInt();
 
-    void mulInt(int op1, int op2, int op3);
+    void mulInt();
 
-    void divInt(int op1, int op2, int op3);
+    void divInt();
 
-    void modInt(int op1, int op2, int op3);
+    void modInt();
 
-    void input_float(int op1, int op2);
+    void input_float();
 
-    void output_float(int op1, int op2);
+    void output_float();
 
-    void addFloat(int op1, int op2, int op3);
+    void addFloat();
 
-    void subFloat(int op1, int op2, int op3);
+    void subFloat();
 
-    void mulFloat(int op1, int op2, int op3);
+    void mulFloat();
 
-    void divFloat(int op1, int op2, int op3);
+    void divFloat();
 
-    void intToFloat(int op1, int op3);
+    void intToFloat();
 
-    void floatToInt(int op1, int op3);
+    void floatToInt();
 
-    void unconditional(int op2);
+    void unconditional();
 
-    void PR (int op2);
+    void PR ();
 
-    void PNR (int op2);
+    void PNR ();
 
-    void PB (int op2);
+    void PB ();
 
-    void PM (int op2);
+    void PM ();
 
-    void PBR (int op2);
+    void PBR ();
 
-    void PMR (int op2);
+    void PMR ();
 
-    void just_if(int op1, int op2, int op3);
+    void just_if();
 
-    void send(int op1, int op3);
+    void send();
 
     bool tact();
 
+    void LoadRegisters (int& REG1, int& REG2);
+
+    void LoadRegisters (long double& REG1, long double& REG2);
+
+    void OutRangeChecker (long long res, Command_code command);
+
+    void OutRangeChecker (long double res, Command_code command);
+
 public:
     Processor();
+
+    ~Processor();
 
     Memory* get_Memory();
 
@@ -89,5 +106,5 @@ public:
 
     void main_process();
 
-    string  output_stat();
+    string output_stat();
 };

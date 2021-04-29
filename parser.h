@@ -69,6 +69,8 @@ private:
     static std::string get_token (std::string& s, int num);
 
 public:
+    static std::string getTokenInt();
+
     static int stoi (std::string stroka, int origin_system = 2);   // string to integer
 
     static std::string itos (int value, int length = 32, int new_system = 2);   // integer to string
@@ -82,4 +84,6 @@ public:
     static long double stold (std::string s); // string to long double
 
     static std::string ftos (float number);    // float to string
+
+    static bool stringCmpGE (std::string s1, std::string s2);   // compare, stringCmpGE("-2", "3") = false
 };

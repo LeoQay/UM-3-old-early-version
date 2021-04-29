@@ -189,3 +189,52 @@ string Parser::ftos(float number) /* вещественное число 1.Manti
 
     return answer;
 }
+
+string Parser::getTokenInt()
+{
+    string s;
+    getline(cin, s);
+
+    if (s.length() == 0)
+        throw Empty(0, "Empty token!");
+
+    int iter = 0;
+    while (iter < s.length() && s[iter] == ' ') iter++;
+    s.erase(0, iter);
+
+    iter = s.length() - 1;
+    while (iter > 0 && s[iter] == ' ') iter--;
+    s.erase(iter + 1, s.length() - iter - 1);
+
+    if (!number(s))
+        throw Bad_token(0, s, "Bad int token!");
+
+    string minIntStr = "-2147483648", maxIntStr = "2147483647";
+
+    if (!(stringCmpGE(s, minIntStr) && stringCmpGE(maxIntStr, s)))
+        throw Bad_token(0, s, "Int Out Range!");
+
+    return s;
+}
+
+bool Parser::stringCmpGE (string s1, string s2)      // return s1 >= s2 ? true : false
+{
+    if (s1[0] != '-' && s2[0] == '-') return true;
+    if (s1[0] == '-' && s2[0] != '-') return false;
+    bool reverse = false;
+
+    if (s1[0] == '-' && s2[0] == '-')
+    {
+        reverse = true;
+        s1.erase(0, 1);
+        s2.erase(0, 1);
+    }
+
+    if (s1.length() > s2.length()) return true xor reverse;
+    if (s1.length() < s2.length()) return false xor reverse;
+
+    if (s1 >= s2)
+        return true xor reverse;
+    else
+        return false xor reverse;
+}

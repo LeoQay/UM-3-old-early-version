@@ -23,11 +23,24 @@ Processor::Processor()
     RK = "Empty";
     R1 = "Empty";
     R2 = "Empty";
+    I1 = 0, I2 = 0;
+    F1 = 0, F2 = 0;
     S = "Empty";
+    op1 = 0, op2 = 0, op3 = 0;
     iterations = 0;
     max_iterations = -1;
     /* если не установить максимальное число итераций,
      * то iterations никогда не равен max_iterations */
+
+    maxInt = 2147483647;
+    minInt = -2147483648;
+    maxFloat = 3.402823466 * pow(10, 38);
+    minFloat = 1.175494351 * pow(10, -38);
+}
+
+Processor::~Processor()
+{
+    cout << output_stat();
 }
 
 void Processor::input_punched_card(ifstream& fin)
@@ -39,133 +52,121 @@ void Processor::output_memory(ofstream& fout)
 {
     for (int i = 0; i < 512; i++)
     {
-        if (i < 10) fout << "  ";
-        else
-        if (i < 100) fout << " ";
+        if (i < 10)
+            fout << "  ";
+        else if (i < 100)
+            fout << " ";
 
         fout << i << " " << mem_obj.get(i) << "\n";
     }
 }
 
-void Processor::input_int(int op1, int op2)
+void Processor::inInt()
 {
     int value;
     while (op2-- > 0)
     {
-        cin >> value;
+        bool ok = false;
+
+        cout << "Input int to " << op1 << " cell:\n";
+
+        while (!ok)
+        {
+            try {
+                string s = Parser::getTokenInt();
+                value = Parser::stoi(s, 10);
+                ok = true;
+            }
+
+            catch (Empty &err) {
+                cout << err.what() << "\n";
+                cout << "Rewrite please:\n";
+            }
+
+            catch (Bad_token &err) {
+                cout << err.what() << "\n";
+                cout << "Rewrite please:\n";
+            }
+        }
+
         mem_obj.push(op1, Parser::itos(value));
         op1 = (op1 + 1) % 512;
     }
 }
 
-void Processor::output_int(int op1, int op2)
+void Processor::outInt()
 {
     while(op2-- > 0)
         cout << Parser::stoi(mem_obj.get(op1++)) << "\n";
 }
 
-void Processor::addInt(int op1, int op2, int op3)
+void Processor::addInt()
 {
-    R1 = mem_obj.get(op2);
-    R2 = mem_obj.get(op3);
-    int I1 = Parser::stoi(R1);
-    int I2 = Parser::stoi(R2);
+    LoadRegisters(I1, I2);
     long long res = (long long)I1 + (long long)I2;
 
-    if (res < -2147483648 || res > 2147483647)
-    {
-        Err = true;
-        throw MathOutRange(saveRA, (int)Command_code::ADDINT, op1, op2, op3, I1, I2);
-    }
+    OutRangeChecker(res, ADDINT);
 
     omega_res((int)res);
     S = Parser::itos((int)res);
     mem_obj.push(op1, S);
 }
 
-void Processor::subInt(int op1, int op2, int op3)
+void Processor::subInt()
 {
-    R1 = mem_obj.get(op2);
-    R2 = mem_obj.get(op3);
-    int I1 = Parser::stoi(R1);
-    int I2 = Parser::stoi(R2);
+    LoadRegisters(I1, I2);
     long long res = (long long)I1 - (long long)I2;
 
-    if (res < -2147483648 || res > 2147483647)
-    {
-        Err = true;
-        throw MathOutRange(saveRA, (int)Command_code::SUBINT, op1, op2, op3, I1, I2);
-    }
+    OutRangeChecker(res, SUBINT);
 
     omega_res((int)res);
     S = Parser::itos((int)res);
     mem_obj.push(op1, S);
 }
 
-void Processor::mulInt(int op1, int op2, int op3)
+void Processor::mulInt()
 {
-    R1 = mem_obj.get(op2);
-    R2 = mem_obj.get(op3);
-    int I1 = Parser::stoi(R1);
-    int I2 = Parser::stoi(R2);
+    LoadRegisters(I1, I2);
     long long res = (long long)I1 * (long long)I2;
 
-    if (res < -2147483648 || res > 2147483647)
-    {
-        Err = true;
-        throw MathOutRange(saveRA, (int)Command_code::MULINT, op1, op2, op3, I1, I2);
-    }
+    OutRangeChecker(res, MULINT);
 
     omega_res((int)res);
     S = Parser::itos((int)res);
     mem_obj.push(op1, S);
 }
 
-void Processor::divInt(int op1, int op2, int op3)
+void Processor::divInt()
 {
-    R1 = mem_obj.get(op2);
-    R2 = mem_obj.get(op3);
-    int I1 = Parser::stoi(R1);
-    int I2 = Parser::stoi(R2);
+    LoadRegisters(I1, I2);
 
     if (I2 == 0) throw NULL_DIVIDE(saveRA, (int)Command_code::DIVINT, op1, op2, op3);
 
     long long res = (long long)I1 / (long long)I2;
 
-    if (res < -2147483648 || res > 2147483647)
-    {
-        Err = true;
-        throw MathOutRange(saveRA, (int)Command_code::DIVINT, op1, op2, op3, I1, I2);
-    }
+    OutRangeChecker(res, DIVINT);
 
     omega_res((int)res);
     S = Parser::itos((int)res);
     mem_obj.push(op1, S);
 }
 
-void Processor::modInt(int op1, int op2, int op3)
+void Processor::modInt()
 {
-    R1 = mem_obj.get(op2);
-    R2 = mem_obj.get(op3);
-    int I1 = Parser::stoi(R1);
-    int I2 = Parser::stoi(R2);
+    LoadRegisters(I1, I2);
 
     if (I2 == 0) throw NULL_DIVIDE(saveRA, (int)Command_code::MOD, op1, op2, op3);
 
     long long res = (long long)I1 % (long long)I2;
 
-    if (res < -2147483648 || res > 2147483647)
-    {
-        Err = true;
-        throw MathOutRange(saveRA, (int)Command_code::MOD, op1, op2, op3, I1, I2);
-    }
+    OutRangeChecker(res, MOD);
 
     omega_res((int)res);
     S = Parser::itos((int)res);
     mem_obj.push(op1, S);
 }
 
-void Processor::input_float(int op1, int op2)
+void Processor::input_float()         ////////////////////////// 
 {
     float value;
     while (op2-- > 0)
@@ -176,90 +177,74 @@ void Processor::input_float(int op1, int op2)
     }
 }
 
-void Processor::output_float(int op1, int op2)
+void Processor::output_float()
 {
     while(op2-- > 0)
         cout << (float)(Parser::stold(mem_obj.get(op1++))) << "\n";
 }
 
-void Processor::addFloat(int op1, int op2, int op3)
+void Processor::addFloat()
 {
-    R1 = mem_obj.get(op2);
-    R2 = mem_obj.get(op3);
-
-    long double F1 = Parser::stold(R1);
-    long double F2 = Parser::stold(R2);
+    LoadRegisters(F1, F2);
     long double res = F1 + F2;
 
-    if (abs(res) > 3.402823466 * pow(10, 38) || abs(res) < 1.175494351 * pow(10, -38))
-        throw MathOutRange(saveRA, (int)Command_code::ADDFLOAT, op1, op2, op3, (float)F1, (float)F2);
+    OutRangeChecker(res, ADDFLOAT);
 
     omega_res((float)res);
     S = Parser::ftos((float)res);
     mem_obj.push(op1, S);
 }
 
-void Processor::subFloat(int op1, int op2, int op3)
+void Processor::subFloat()
 {
-    R1 = mem_obj.get(op2);
-    R2 = mem_obj.get(op3);
-    long double F1 = Parser::stold(R1);
-    long double F2 = Parser::stold(R2);
+    LoadRegisters(F1, F2);
     long double res = F1 - F2;
 
-    if (abs(res) >= 3.402823466 * pow(10, 38) || abs(res) <= 1.175494351 * pow(10, -38))
-        throw MathOutRange(saveRA, (int)Command_code::SUBFLOAT, op1, op2, op3, (float)F1, (float)F2);
+    OutRangeChecker(res, SUBFLOAT);
 
     omega_res((float)res);
     S = Parser::ftos((float)res);
     mem_obj.push(op1, S);
 }
 
-void Processor::mulFloat(int op1, int op2, int op3)
+void Processor::mulFloat()
 {
-    R1 = mem_obj.get(op2);
-    R2 = mem_obj.get(op3);
-    long double F1 = Parser::stold(R1);
-    long double F2 = Parser::stold(R2);
+    LoadRegisters(F1, F2);
     long double res = F1 * F2;
 
-    if (abs(res) >= 3.402823466 * pow(10, 38) || abs(res) <= 1.175494351 * pow(10, -38))
-        throw MathOutRange(saveRA, (int)Command_code::MULFLOAT, op1, op2, op3, (float)F1, (float)F2);
+    OutRangeChecker(res, MULFLOAT);
 
     omega_res((float)res);
     S = Parser::ftos((float)res);
     mem_obj.push(op1, S);
 }
 
-void Processor::divFloat(int op1, int op2, int op3)
+void Processor::divFloat()
 {
-    R1 = mem_obj.get(op2);
-    R2 = mem_obj.get(op3);
-    long double F1 = Parser::stold(R1);
-    long double F2 = Parser::stold(R2);
+    LoadRegisters(F1, F2);
 
     if (F2 == 0) throw NULL_DIVIDE(saveRA, (int)Command_code::DIVFLOAT, op1, op2, op3);
 
     long double res = F1 / F2;
 
-    if (abs(res) >= 3.402823466 * pow(10, 38) || abs(res) <= 1.175494351 * pow(10, -38))
-        throw MathOutRange(saveRA, (int)Command_code::DIVFLOAT, op1, op2, op3, (float)F1, (float)F2);
+    OutRangeChecker(res, DIVFLOAT);
 
     omega_res((float)res);
     S = Parser::ftos((float)res);
     mem_obj.push(op1, S);
 }
 
-void Processor::intToFloat (int op1, int op3)
+void Processor::intToFloat ()
 {
+    // int is always placed in float
     mem_obj.push(op1, Parser::ftos((float)Parser::stoi(mem_obj.get(op3))));
 }
 
-void Processor::floatToInt (int op1, int op3)
+void Processor::floatToInt ()
 {
     long double F = Parser::stold(mem_obj.get(op3));
 
-    if (F < -2147483648 || F > 2147483647)
+    if (F < minInt || F > maxInt)
     {
         Err = true;
         throw FTOIOutRange(saveRA, (int)Command_code::FTOI, op1, op3, F);
@@ -268,39 +253,39 @@ void Processor::floatToInt (int op1, int op3)
     mem_obj.push(op1, Parser::itos((int)F));
 }
 
-void Processor::unconditional (int op2) { RA = op2; }
+void Processor::unconditional () { RA = op2; }
 
-void Processor::PR(int op2)
+void Processor::PR()
 {
     if (omega == 0) RA = op2;
 }
 
-void Processor::PNR (int op2)
+void Processor::PNR ()
 {
     if (omega != 0) RA = op2;
 }
 
-void Processor::PB (int op2)
+void Processor::PB ()
 {
     if (omega == 2) RA = op2;
 }
 
-void Processor::PM (int op2)
+void Processor::PM ()
 {
     if (omega == 1) RA = op2;
 }
 
-void Processor::PBR (int op2)
+void Processor::PBR ()
 {
     if (omega != 1) RA = op2;
 }
 
-void Processor::PMR (int op2)
+void Processor::PMR ()
 {
     if (omega != 2) RA = op2;
 }
 
-void Processor::just_if (int op1, int op2, int op3)
+void Processor::just_if ()
 {
     switch (omega)
     {
@@ -315,7 +300,7 @@ void Processor::just_if (int op1, int op2, int op3)
     }
 }
 
-void Processor::send(int op1, int op3)
+void Processor::send()
 {
     mem_obj.push(op1, mem_obj.get(op3));
 }
@@ -332,82 +317,82 @@ bool Processor::tact()
     RA = (RA + 1) % 512;
 
     Command_code command;
-    int op1, op2, op3;
+
     Parser::pars_of_cell(RK, command, op1, op2, op3);
 
     switch (command)
     {
         case Command_code::ININT:
-            input_int(op1, op2);
+            inInt();
             break;
         case Command_code::OUTINT:
-            output_int(op1, op2);
+            outInt();
             break;
         case Command_code::ADDINT:
-            addInt(op1, op2, op3);
+            addInt();
             break;
         case Command_code::SUBINT:
-            subInt(op1, op2, op3);
+            subInt();
             break;
         case Command_code::MULINT:
-            mulInt(op1, op2, op3);
+            mulInt();
             break;
         case Command_code::DIVINT:
-            divInt(op1, op2, op3);
+            divInt();
             break;
         case Command_code::MOD:
-            modInt(op1, op2, op3);
+            modInt();
             break;
         case Command_code::INFLOAT:
-            input_float(op1, op2);
+            input_float();
             break;
         case Command_code::OUTFLOAT:
-            output_float(op1, op2);
+            output_float();
             break;
         case Command_code::ADDFLOAT:
-            addFloat(op1, op2, op3);
+            addFloat();
             break;
         case Command_code::SUBFLOAT:
-            subFloat(op1, op2, op3);
+            subFloat();
             break;
         case Command_code::MULFLOAT:
-            mulFloat(op1, op2, op3);
+            mulFloat();
             break;
         case Command_code::DIVFLOAT:
-            divFloat(op1, op2, op3);
+            divFloat();
             break;
         case Command_code::ITOF:
-            intToFloat(op1, op3);
+            intToFloat();
             break;
         case Command_code::FTOI:
-            floatToInt(op1, op3);
+            floatToInt();
             break;
         case Command_code::UNCOND:
-            unconditional(op2);
+            unconditional();
             break;
         case Command_code::PR:
-            PR(op2);
+            PR();
             break;
         case Command_code::PNR:
-            PNR(op2);
+            PNR();
             break;
         case Command_code::PB:
-            PB(op2);
+            PB();
             break;
         case Command_code::PM:
-            PM(op2);
+            PM();
             break;
         case Command_code::PBR:
-            PBR(op2);
+            PBR();
             break;
         case Command_code::PMR:
-            PMR(op2);
+            PMR();
             break;
         case Command_code::IF:
-            just_if(op1, op2, op3);
+            just_if();
             break;
         case Command_code::SEND:
-            send(op1, op3);
+            send();
             break;
         case Command_code::END:
             return false;
@@ -449,4 +434,38 @@ string Processor::output_stat()
     answer += (char) ('0' + omega);
     answer += "\n";
     return answer;
+}
+
+void Processor::LoadRegisters(int &REG1, int &REG2)
+{
+    R1 = mem_obj.get(op2);
+    R2 = mem_obj.get(op3);
+    REG1 = Parser::stoi(R1);
+    REG2 = Parser::stoi(R2);
+}
+
+void Processor::LoadRegisters(long double &REG1, long double &REG2)
+{
+    R1 = mem_obj.get(op2);
+    R2 = mem_obj.get(op3);
+    REG1 = Parser::stold(R1);
+    REG2 = Parser::stold(R2);
+}
+
+void Processor::OutRangeChecker(long long res, Command_code command)
+{
+    if (res < -minInt || res > maxInt)
+    {
+        Err = true;
+        throw MathOutRange(saveRA, (int)command, op1, op2, op3, I1, I2);
+    }
+}
+
+void Processor::OutRangeChecker(long double res, Command_code command)
+{
+    if (abs(res) > maxFloat || abs(res) < minFloat)
+    {
+        Err = true;
+        throw MathOutRange(saveRA, (int)command, op1, op2, op3, (float)F1, (float)F2);
+    }
 }

@@ -18,21 +18,18 @@ int main()
     catch (IndexOutRange& err)
     {
         cout << "\nError in the line " << err.cell_number << "\n" << err.what() << "\n\n";
-        cout << proc_obj.output_stat();
         return 1;
     }
 
     catch (Bad_token& err)
     {
         cout << "\nError in the line " << err.cell_number << "\n" << err.what() << "\n\n";
-        cout << proc_obj.output_stat();
         return 1;
     }
 
     catch (Empty& err)
     {
         cout << "\nError in the line " << err.cell_number << "\n" << err.what() << "\n\n";
-        cout << proc_obj.output_stat();
         return 1;
     }
 
@@ -43,28 +40,24 @@ int main()
     catch (Bad_command& err)
     {
         cout << "\nError in the cell " << err.cell_number << "\n" << err.what() << "\n\n";
-        cout << proc_obj.output_stat();
         return 1;
     }
 
     catch (NULL_DIVIDE& err)
     {
         cout << "\nError in the cell " << err.cell_number << "\n" << err.what() << "\n\n";
-        cout << proc_obj.output_stat();
         return 1;
     }
 
     catch (FTOIOutRange& err)
     {
         cout << "\nError in the cell " << err.cell_number << "\n" << err.what() << "\n\n";
-        cout << proc_obj.output_stat();
         return 1;
     }
 
     catch (MathOutRange& err)
     {
         cout << "\nError in the cell " << err.cell_number << "\n" << err.what() << "\n\n";
-        cout << proc_obj.output_stat();
         return 1;
     }
 
@@ -74,6 +67,7 @@ int main()
 
     fin.close();
     fout.close();
+
 
     return 0;
 }
