@@ -5,7 +5,7 @@
 #include <fstream>
 #include <map>
 
-enum Command_code {
+enum CommandCode {
     ININT = 16,
     OUTINT = 17,
     ADDINT = 11,
@@ -31,12 +31,14 @@ enum Command_code {
     IF = 19,
     SEND = 0,
     END = 31
+    // undefined commands: 5, 8, 18, 26, 27, 28, 29
+    // enjoy for fantasy
 };
 
 class Parser
 {
 private:
-    std::map <std::string, Command_code> m = {
+    std::map <std::string, CommandCode> mapCommands = {
             {"ININT",    ININT},
             {"OUTINT", OUTINT},
             {"ADDINT",   ADDINT},
@@ -66,11 +68,9 @@ private:
 
     int command_check (std::string command, int num);
 
-    static std::string get_token (std::string& s, int num);
+    static std::string getTokenCell (std::string& token, int num);
 
 public:
-    static std::string getTokenInt();
-
     static int stoi (std::string stroka, int origin_system = 2);   // string to integer
 
     static std::string itos (int value, int length = 32, int new_system = 2);   // integer to string
@@ -79,11 +79,13 @@ public:
 
     static bool number (std::string& s); // true, еслм в строке целое число
 
-    static void pars_of_cell (std::string& s, Command_code& command, int& op1, int& op2, int& op3);
+    static void cellParser (std::string& s, CommandCode& command, int& op1, int& op2, int& op3);
 
     static long double stold (std::string s); // string to long double
 
     static std::string ftos (float number);    // float to string
+
+    static std::string getTokenInt();
 
     static bool stringCmpGE (std::string s1, std::string s2);   // compare, stringCmpGE("-2", "3") = false
 };

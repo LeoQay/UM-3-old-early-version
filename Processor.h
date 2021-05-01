@@ -13,7 +13,7 @@ private:
     string R2;           /* второй регистр АЛУ */
     int I1, I2;          // регистры АЛУ для целых
     long double F1, F2;  // регистры АЛУ для вещественных
-    string S;            /* регистр сумматора (хранит результат) */
+    string Summator;     /* регистр сумматора (хранит результат) */
     int RA;              /* счетчик адреса, содержит адрес следующей команды  */
     bool Err;            /* регистр ошибок, true - произошла ошибка  */
     string RK;           /* текущая команда  */
@@ -85,9 +85,9 @@ private:
 
     void LoadRegisters (long double& REG1, long double& REG2);
 
-    void OutRangeChecker (long long res, Command_code command);
+    void OutRangeChecker (long long res, CommandCode command);
 
-    void OutRangeChecker (long double res, Command_code command);
+    void OutRangeChecker (long double res, CommandCode command);
 
 public:
     Processor();

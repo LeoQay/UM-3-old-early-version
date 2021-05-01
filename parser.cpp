@@ -7,89 +7,102 @@ using namespace std;
 
 int Parser::command_check (string command, int num)
 {
-    if (isdigit(command[0]))
+    if (number(command))
     {
-        int iter = 0;
-        while (isdigit(command[iter]) && iter < command.length()) iter++;
-
-        if (iter == command.length())
-        {
-            int answer = stoi(command, 10);
-            if (answer >= 0 && answer <= 31)
-                return answer;
-            else
-                throw IndexOutRange(num, answer, "Out range of command!");
-        }
+        int answer = stoi(command, 10);
+        if (answer >= 0 && answer <= 31)
+            return answer;
         else
-            throw Bad_token(num, command, "Bad token of command!");
+            throw IndexOutRange(num, answer, "Out range of command!");
     }
 
-    if (m.find(command) == m.end()) throw Bad_token(num, command, "Bad token of command!");
+    // сюда попадем только, если команда - не число
+    // mapCommands - map, хранящий список доступных команд
 
-    return m[command];
+    if (mapCommands.find(command) == mapCommands.end())
+        throw Bad_token(num, command, "Bad token of command!");
+
+    return mapCommands[command];
 }
 
-string Parser::get_token (string& s, int num)
+string Parser::getTokenCell (string& token, int num)
 {
+    // данная функция отрезает от входной строки первый токен
+    // обособленный пробелами или концами строки
+    // если строка пуста или состоит из пробелов, бросается исключение
+
     string answer;
 
     int iter = 0;
-    while (s[iter] == ' ' && iter < s.length()) iter++;
+    while (token[iter] == ' ' && iter < token.length()) iter++;
 
-    if (iter == s.length()) throw Empty(num, "Empty");
+    if (iter == token.length()) throw Empty(num, "Empty");
 
-    s.erase(0, iter);
+    token.erase(0, iter);
 
     iter = 0;
-    while (iter < s.size() && s[iter] != ' ') answer += s[iter++];
-    s.erase(0, iter);
+    while (iter < token.size() && token[iter] != ' ') answer += token[iter++];
+    token.erase(0, iter);
 
     return answer;
 }
 
 void Parser::get_punched_card (ifstream &fin, Memory* mem_obj)
 {
-    int number_cell = 0;
+    // функция парсит перфокарту и бросает исключения, если допущены ошибки
+    int cellNumber = 0;
     while (!fin.eof())
     {
-        number_cell++;
+        cellNumber++;
+
         int position;
-        string s, result, buffer;
-        getline(fin, s);
+        string cell, result, token;
 
-        //   номер ячейки
-        try{ buffer = get_token(s, number_cell); }
-        catch (Empty&) { throw Empty(number_cell, "Empty number!");}
+        getline(fin, cell);
 
-        if (buffer.length() > 3) throw Bad_token(number_cell, buffer, "Too long token of cell number!");
+        // удаление комментариев
+        unsigned int comment_pos = cell.find(';');
+        if (comment_pos != -1)
+            cell.erase(comment_pos, cell.length() - comment_pos);
 
-        if (!number(buffer)) throw Bad_token(number_cell, buffer);
+        //  парсинг номера ячейки
+        try{ token = getTokenCell(cell, cellNumber); }
+        catch (Empty&) { continue; }
 
-        position = stoi(buffer, 10);
-        if (position >= 512 || position <= -1) throw IndexOutRange(number_cell, position);
+        // проверка на то, является ли прочитанная лексема числовой
+        if (!number(token))
+            throw Bad_token(cellNumber, token, "Bad token of cell number!");
+
+        // все-таки числовая, проверим на выход за диапазон
+        position = stoi(token, 10);
+
+        if (position > 511 || position < 0)
+            throw IndexOutRange(cellNumber, position, "Cell number out range!");
 
         //   команда
-        try{ buffer = get_token(s, number_cell); }
-        catch (Exceptions&) { throw Empty(number_cell, "Empty command!");}
+        try{ token = getTokenCell(cell, cellNumber); }
+        catch (Empty&) { throw Empty(cellNumber, "Empty command!");}
 
-        result += itos(command_check(buffer, number_cell), 5);
+        // командам в памяти ум3 отводится 5 битов
+        result += itos(command_check(token, cellNumber), 5);
 
         // op1, op2, op3
         for (int i = 0; i < 3; i++)
         {
-            string opi = "op";
-            opi += char('1' + i);
+            string opi = "op1"; opi[2] += i;
 
-            try{ buffer = get_token(s, number_cell); }
-            catch (Empty&) { throw Empty(number_cell, "Empty " + opi + "!"); }
+            try{ token = getTokenCell(cell, cellNumber); }
+            catch (Empty&) { throw Empty(cellNumber, "Empty " + opi + "!"); }
 
-            if (!number(buffer)) throw Bad_token(number_cell, buffer, "Bad token of " + opi + "!");
+            // адреса операндов должны быть числами
+            if (!number(token)) throw Bad_token(cellNumber, token, "Bad token of " + opi + "!");
 
-            int token_val = stoi(buffer, 10);
+            int token_val = stoi(token, 10);
 
-            if (token_val >= 512 || token_val <= -1)
-                throw IndexOutRange(number_cell, token_val, "Index out range " + opi + "!");
+            if (token_val > 511 || token_val < 0)
+                throw IndexOutRange(cellNumber, token_val, "Index out range " + opi + "!");
 
+            // каждому операнду отводится по 9 бит
             result += itos(token_val, 9);
         }
 
@@ -97,7 +110,7 @@ void Parser::get_punched_card (ifstream &fin, Memory* mem_obj)
     }
 }
 
-bool Parser::number(string& s)
+bool Parser::number(string& s)  // проверка на числовую лексему
 {
     int i = 0;
     while (((i == 0 && s[0] == '-') || isdigit(s[i])) && i < s.length()) i++;
@@ -105,9 +118,9 @@ bool Parser::number(string& s)
     return i == s.length();
 }
 
-void Parser::pars_of_cell (string& s, Command_code& command, int& op1, int& op2, int& op3)
+void Parser::cellParser (string& s, CommandCode& command, int& op1, int& op2, int& op3)
 {
-    command = (Command_code) stoi(s.substr(0, 5));
+    command = (CommandCode)stoi(s.substr(0, 5));
     op1 = stoi(s.substr(5, 9));
     op2 = stoi(s.substr(14, 9));
     op3 = stoi(s.substr(23, 9));
@@ -115,7 +128,7 @@ void Parser::pars_of_cell (string& s, Command_code& command, int& op1, int& op2,
 
 int Parser::stoi (std::string stroka, int origin_system)
 {
-    unsigned int num = 0, ten_sys, it = 0;
+    int num = 0, ten_sys, it = 0;
     int sign = 1;
 
     if (stroka[0] == '-')
@@ -131,7 +144,7 @@ int Parser::stoi (std::string stroka, int origin_system)
         it++;
     }
 
-    return (signed int)num * sign;
+    return num * sign;
 }
 
 std::string Parser::itos (int value, int length, int new_system)
@@ -150,6 +163,7 @@ std::string Parser::itos (int value, int length, int new_system)
 
 long double Parser::stold (string s)
 {
+    // в памяти +0 = 000...00,  -0 = 100...00
     if (s.substr(1, 31) == "0000000000000000000000000000000")  // 31 zero
         return 0;
 
@@ -202,7 +216,7 @@ string Parser::getTokenInt()
     while (iter < s.length() && s[iter] == ' ') iter++;
     s.erase(0, iter);
 
-    iter = s.length() - 1;
+    iter = (int)s.length() - 1;
     while (iter > 0 && s[iter] == ' ') iter--;
     s.erase(iter + 1, s.length() - iter - 1);
 
@@ -217,6 +231,7 @@ string Parser::getTokenInt()
     return s;
 }
 
+// GRADE EQUAL
 bool Parser::stringCmpGE (string s1, string s2)      // return s1 >= s2 ? true : false
 {
     if (s1[0] != '-' && s2[0] == '-') return true;

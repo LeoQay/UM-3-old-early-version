@@ -13,61 +13,21 @@ int main()
 
     try {
         proc_obj.input_punched_card(fin);
-    }
 
-    catch (IndexOutRange& err)
-    {
-        cout << "\nError in the line " << err.cell_number << "\n" << err.what() << "\n\n";
-        return 1;
-    }
-
-    catch (Bad_token& err)
-    {
-        cout << "\nError in the line " << err.cell_number << "\n" << err.what() << "\n\n";
-        return 1;
-    }
-
-    catch (Empty& err)
-    {
-        cout << "\nError in the line " << err.cell_number << "\n" << err.what() << "\n\n";
-        return 1;
-    }
-
-    try{
         proc_obj.main_process();
+
+        proc_obj.output_memory(fout);
+
+        proc_obj.clear_memory();
     }
 
-    catch (Bad_command& err)
+    catch (Exceptions& err)
     {
         cout << "\nError in the cell " << err.cell_number << "\n" << err.what() << "\n\n";
         return 1;
     }
-
-    catch (NULL_DIVIDE& err)
-    {
-        cout << "\nError in the cell " << err.cell_number << "\n" << err.what() << "\n\n";
-        return 1;
-    }
-
-    catch (FTOIOutRange& err)
-    {
-        cout << "\nError in the cell " << err.cell_number << "\n" << err.what() << "\n\n";
-        return 1;
-    }
-
-    catch (MathOutRange& err)
-    {
-        cout << "\nError in the cell " << err.cell_number << "\n" << err.what() << "\n\n";
-        return 1;
-    }
-
-    proc_obj.output_memory(fout);
-
-    proc_obj.clear_memory();
 
     fin.close();
     fout.close();
-
-
     return 0;
 }

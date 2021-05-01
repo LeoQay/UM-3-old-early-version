@@ -25,7 +25,7 @@ Processor::Processor()
     R2 = "Empty";
     I1 = 0, I2 = 0;
     F1 = 0, F2 = 0;
-    S = "Empty";
+    Summator = "Empty";
     op1 = 0, op2 = 0, op3 = 0;
     iterations = 0;
     max_iterations = -1;
@@ -68,7 +68,7 @@ void Processor::inInt()
     {
         bool ok = false;
 
-        cout << "Input int to " << op1 << " cell:\n";
+        cout << "Input int to " << op1 << " cell:";
 
         while (!ok)
         {
@@ -78,14 +78,9 @@ void Processor::inInt()
                 ok = true;
             }
 
-            catch (Empty &err) {
+            catch (Exceptions &err) {
                 cout << err.what() << "\n";
-                cout << "Rewrite please:\n";
-            }
-
-            catch (Bad_token &err) {
-                cout << err.what() << "\n";
-                cout << "Rewrite please:\n";
+                cout << "Rewrite please:";
             }
         }
 
@@ -108,8 +103,8 @@ void Processor::addInt()
     OutRangeChecker(res, ADDINT);
 
     omega_res((int)res);
-    S = Parser::itos((int)res);
-    mem_obj.push(op1, S);
+    Summator = Parser::itos((int)res);
+    mem_obj.push(op1, Summator);
 }
 
 void Processor::subInt()
@@ -120,8 +115,8 @@ void Processor::subInt()
     OutRangeChecker(res, SUBINT);
 
     omega_res((int)res);
-    S = Parser::itos((int)res);
-    mem_obj.push(op1, S);
+    Summator = Parser::itos((int)res);
+    mem_obj.push(op1, Summator);
 }
 
 void Processor::mulInt()
@@ -132,41 +127,41 @@ void Processor::mulInt()
     OutRangeChecker(res, MULINT);
 
     omega_res((int)res);
-    S = Parser::itos((int)res);
-    mem_obj.push(op1, S);
+    Summator = Parser::itos((int)res);
+    mem_obj.push(op1, Summator);
 }
 
 void Processor::divInt()
 {
     LoadRegisters(I1, I2);
 
-    if (I2 == 0) throw NULL_DIVIDE(saveRA, (int)Command_code::DIVINT, op1, op2, op3);
+    if (I2 == 0) throw NULL_DIVIDE(saveRA, (int)CommandCode::DIVINT, op1, op2, op3);
 
     long long res = (long long)I1 / (long long)I2;
 
     OutRangeChecker(res, DIVINT);
 
     omega_res((int)res);
-    S = Parser::itos((int)res);
-    mem_obj.push(op1, S);
+    Summator = Parser::itos((int)res);
+    mem_obj.push(op1, Summator);
 }
 
 void Processor::modInt()
 {
     LoadRegisters(I1, I2);
 
-    if (I2 == 0) throw NULL_DIVIDE(saveRA, (int)Command_code::MOD, op1, op2, op3);
+    if (I2 == 0) throw NULL_DIVIDE(saveRA, (int)CommandCode::MOD, op1, op2, op3);
 
     long long res = (long long)I1 % (long long)I2;
 
     OutRangeChecker(res, MOD);
 
     omega_res((int)res);
-    S = Parser::itos((int)res);
-    mem_obj.push(op1, S);
+    Summator = Parser::itos((int)res);
+    mem_obj.push(op1, Summator);
 }
 
-void Processor::input_float()         ////////////////////////// 
+void Processor::input_float()         //////////////////////////
 {
     float value;
     while (op2-- > 0)
@@ -191,8 +186,8 @@ void Processor::addFloat()
     OutRangeChecker(res, ADDFLOAT);
 
     omega_res((float)res);
-    S = Parser::ftos((float)res);
-    mem_obj.push(op1, S);
+    Summator = Parser::ftos((float)res);
+    mem_obj.push(op1, Summator);
 }
 
 void Processor::subFloat()
@@ -203,8 +198,8 @@ void Processor::subFloat()
     OutRangeChecker(res, SUBFLOAT);
 
     omega_res((float)res);
-    S = Parser::ftos((float)res);
-    mem_obj.push(op1, S);
+    Summator = Parser::ftos((float)res);
+    mem_obj.push(op1, Summator);
 }
 
 void Processor::mulFloat()
@@ -215,23 +210,23 @@ void Processor::mulFloat()
     OutRangeChecker(res, MULFLOAT);
 
     omega_res((float)res);
-    S = Parser::ftos((float)res);
-    mem_obj.push(op1, S);
+    Summator = Parser::ftos((float)res);
+    mem_obj.push(op1, Summator);
 }
 
 void Processor::divFloat()
 {
     LoadRegisters(F1, F2);
 
-    if (F2 == 0) throw NULL_DIVIDE(saveRA, (int)Command_code::DIVFLOAT, op1, op2, op3);
+    if (F2 == 0) throw NULL_DIVIDE(saveRA, (int)CommandCode::DIVFLOAT, op1, op2, op3);
 
     long double res = F1 / F2;
 
     OutRangeChecker(res, DIVFLOAT);
 
     omega_res((float)res);
-    S = Parser::ftos((float)res);
-    mem_obj.push(op1, S);
+    Summator = Parser::ftos((float)res);
+    mem_obj.push(op1, Summator);
 }
 
 void Processor::intToFloat ()
@@ -247,13 +242,16 @@ void Processor::floatToInt ()
     if (F < minInt || F > maxInt)
     {
         Err = true;
-        throw FTOIOutRange(saveRA, (int)Command_code::FTOI, op1, op3, F);
+        throw FTOIOutRange(saveRA, (int)CommandCode::FTOI, op1, op3, F);
     }
 
     mem_obj.push(op1, Parser::itos((int)F));
 }
 
-void Processor::unconditional () { RA = op2; }
+void Processor::unconditional ()
+{
+    RA = op2;
+}
 
 void Processor::PR()
 {
@@ -316,85 +314,85 @@ bool Processor::tact()
     saveRA = RA;
     RA = (RA + 1) % 512;
 
-    Command_code command;
+    CommandCode command;
 
-    Parser::pars_of_cell(RK, command, op1, op2, op3);
+    Parser::cellParser(RK, command, op1, op2, op3);
 
     switch (command)
     {
-        case Command_code::ININT:
+        case CommandCode::ININT:
             inInt();
             break;
-        case Command_code::OUTINT:
+        case CommandCode::OUTINT:
             outInt();
             break;
-        case Command_code::ADDINT:
+        case CommandCode::ADDINT:
             addInt();
             break;
-        case Command_code::SUBINT:
+        case CommandCode::SUBINT:
             subInt();
             break;
-        case Command_code::MULINT:
+        case CommandCode::MULINT:
             mulInt();
             break;
-        case Command_code::DIVINT:
+        case CommandCode::DIVINT:
             divInt();
             break;
-        case Command_code::MOD:
+        case CommandCode::MOD:
             modInt();
             break;
-        case Command_code::INFLOAT:
+        case CommandCode::INFLOAT:
             input_float();
             break;
-        case Command_code::OUTFLOAT:
+        case CommandCode::OUTFLOAT:
             output_float();
             break;
-        case Command_code::ADDFLOAT:
+        case CommandCode::ADDFLOAT:
             addFloat();
             break;
-        case Command_code::SUBFLOAT:
+        case CommandCode::SUBFLOAT:
             subFloat();
             break;
-        case Command_code::MULFLOAT:
+        case CommandCode::MULFLOAT:
             mulFloat();
             break;
-        case Command_code::DIVFLOAT:
+        case CommandCode::DIVFLOAT:
             divFloat();
             break;
-        case Command_code::ITOF:
+        case CommandCode::ITOF:
             intToFloat();
             break;
-        case Command_code::FTOI:
+        case CommandCode::FTOI:
             floatToInt();
             break;
-        case Command_code::UNCOND:
+        case CommandCode::UNCOND:
             unconditional();
             break;
-        case Command_code::PR:
+        case CommandCode::PR:
             PR();
             break;
-        case Command_code::PNR:
+        case CommandCode::PNR:
             PNR();
             break;
-        case Command_code::PB:
+        case CommandCode::PB:
             PB();
             break;
-        case Command_code::PM:
+        case CommandCode::PM:
             PM();
             break;
-        case Command_code::PBR:
+        case CommandCode::PBR:
             PBR();
             break;
-        case Command_code::PMR:
+        case CommandCode::PMR:
             PMR();
             break;
-        case Command_code::IF:
+        case CommandCode::IF:
             just_if();
             break;
-        case Command_code::SEND:
+        case CommandCode::SEND:
             send();
             break;
-        case Command_code::END:
+        case CommandCode::END:
             return false;
         default:
             throw Bad_command(saveRA, (int)command, op1, op2, op3);
@@ -420,15 +418,16 @@ Memory* Processor::get_Memory()
 string Processor::output_stat()
 {
     string answer;
+    answer += "\n-----------------------------------------------------\n";
     answer += "Register statistics:\n";
     answer += "Last command: ";
-    answer += Parser::itos(RA, 3, 10) + " " + RK;
+    answer += Parser::itos(saveRA, 3, 10) + " " + RK;
     answer += "\n";
-    answer += ("R1: " + R1);
+    answer += ("R1      : " + R1);
     answer += "\n";
-    answer += ("R2: " + R2);
+    answer += ("R2      : " + R2);
     answer += "\n";
-    answer += ("Combiner: " + S);
+    answer += ("Summator: " + Summator);
     answer += "\n";
     answer += ("Omega: ");
     answer += (char) ('0' + omega);
@@ -452,16 +451,16 @@ void Processor::LoadRegisters(long double &REG1, long double &REG2)
     REG2 = Parser::stold(R2);
 }
 
-void Processor::OutRangeChecker(long long res, Command_code command)
+void Processor::OutRangeChecker(long long res, CommandCode command)
 {
-    if (res < -minInt || res > maxInt)
+    if (res < minInt || res > maxInt)
     {
         Err = true;
         throw MathOutRange(saveRA, (int)command, op1, op2, op3, I1, I2);
     }
 }
 
-void Processor::OutRangeChecker(long double res, Command_code command)
+void Processor::OutRangeChecker(long double res, CommandCode command)
 {
     if (abs(res) > maxFloat || abs(res) < minFloat)
     {
