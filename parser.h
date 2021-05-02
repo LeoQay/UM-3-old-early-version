@@ -77,7 +77,7 @@ public:
 
     void get_punched_card (std::ifstream &fin, Memory* mem_obj);
 
-    static bool number (std::string& s); // true, еслм в строке целое число
+    static bool number (std::string s); // true, еслм в строке целое число
 
     static void cellParser (std::string& s, CommandCode& command, int& op1, int& op2, int& op3);
 
@@ -86,6 +86,8 @@ public:
     static std::string ftos (float number);    // float to string
 
     static std::string getTokenInt();
+
+    static float getTokenFloat();
 
     static bool stringCmpGE (std::string s1, std::string s2);   // compare, stringCmpGE("-2", "3") = false
 };

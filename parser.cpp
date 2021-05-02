@@ -2,6 +2,7 @@
 #include "parser.h"
 #include "Exceptions.h"
 
+#include <sstream>
 #include <cmath>
 using namespace std;
 
@@ -110,7 +111,7 @@ void Parser::get_punched_card (ifstream &fin, Memory* mem_obj)
     }
 }
 
-bool Parser::number(string& s)  // проверка на числовую лексему
+bool Parser::number(string s)  // проверка на числовую лексему
 {
     int i = 0;
     while (((i == 0 && s[0] == '-') || isdigit(s[i])) && i < s.length()) i++;
@@ -206,29 +207,29 @@ string Parser::ftos(float number) /* вещественное число 1.Manti
 
 string Parser::getTokenInt()
 {
-    string s;
-    getline(cin, s);
+    string token;
+    char c = '-';
+    while (c != '\n')
+    {
+        c = (char)getchar();
+        if (c != '\n') token += c;
+    }
 
-    if (s.length() == 0)
+    while (token[0] == ' ') token.erase(0, 1);
+    while (token[token.length() - 1] == ' ') token.erase(token[token.length() - 1], 1);
+
+    if (token.length() == 0)
         throw Empty(0, "Empty token!");
 
-    int iter = 0;
-    while (iter < s.length() && s[iter] == ' ') iter++;
-    s.erase(0, iter);
-
-    iter = (int)s.length() - 1;
-    while (iter > 0 && s[iter] == ' ') iter--;
-    s.erase(iter + 1, s.length() - iter - 1);
-
-    if (!number(s))
-        throw Bad_token(0, s, "Bad int token!");
+    if (!number(token))
+        throw Bad_token(0, token, "Bad int token!");
 
     string minIntStr = "-2147483648", maxIntStr = "2147483647";
 
-    if (!(stringCmpGE(s, minIntStr) && stringCmpGE(maxIntStr, s)))
-        throw Bad_token(0, s, "Int Out Range!");
+    if (!(stringCmpGE(token, minIntStr) && stringCmpGE(maxIntStr, token)))
+        throw Bad_token(0, token, "Int Out Range!");
 
-    return s;
+    return token;
 }
 
 // GRADE EQUAL
@@ -252,4 +253,41 @@ bool Parser::stringCmpGE (string s1, string s2)      // return s1 >= s2 ? true :
         return true xor reverse;
     else
         return false xor reverse;
+}
+
+float Parser::getTokenFloat()
+{
+    string token;
+    char c = '-';
+
+    while (c != '\n')
+    {
+        c = (char)getchar();
+        if (c != '\n') token += c;
+    }
+
+    while (token[0] == ' ') token.erase(0, 1);
+    while (token[token.length() - 1] == ' ') token.erase(token[token.length() - 1], 1);
+
+    if (token.length() == 0)
+        throw Empty(0, "Empty token!");
+
+    int commaPos = (int)token.find('.');
+
+    if (commaPos == -1)
+    {
+        if (!number(token))
+            throw Bad_token(0, token, "Bad float token!");
+    }else if (token[token.length() - 1] == '.')
+    {
+        if (!number(token.substr(0, commaPos)))
+            throw Bad_token(0, token, "Bad float token!");
+    }else
+    {
+        if (!number(token.substr(0, commaPos)) ||
+            !number(token.substr(commaPos + 1, token.length() - commaPos)))
+            throw Bad_token(0, token, "Bad float token!");
+    }
+
+    return (float)strtod(token.c_str(), nullptr);
 }

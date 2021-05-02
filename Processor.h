@@ -45,9 +45,9 @@ private:
 
     void modInt();
 
-    void input_float();
+    void inFloat();
 
-    void output_float();
+    void outFloat();
 
     void addFloat();
 

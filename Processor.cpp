@@ -161,18 +161,35 @@ void Processor::modInt()
     mem_obj.push(op1, Summator);
 }
 
-void Processor::input_float()         //////////////////////////
+void Processor::inFloat()
 {
     float value;
+
     while (op2-- > 0)
     {
-        cin >> value;
+        bool ok = false;
+
+        cout << "Input float to " << op1 << " cell:";
+
+        while (!ok)
+        {
+            try {
+                value = Parser::getTokenFloat();
+                ok = true;
+            }
+
+            catch (Exceptions &err) {
+                cout << err.what() << "\n";
+                cout << "Rewrite please:";
+            }
+        }
+
         mem_obj.push(op1, Parser::ftos(value));
         op1 = (op1 + 1) % 512;
     }
 }
 
-void Processor::output_float()
+void Processor::outFloat()
 {
     while(op2-- > 0)
         cout << (float)(Parser::stold(mem_obj.get(op1++))) << "\n";
@@ -342,10 +359,10 @@ bool Processor::tact()
             modInt();
             break;
         case CommandCode::INFLOAT:
-            input_float();
+            inFloat();
             break;
         case CommandCode::OUTFLOAT:
-            output_float();
+            outFloat();
             break;
         case CommandCode::ADDFLOAT:
             addFloat();
@@ -462,7 +479,7 @@ void Processor::OutRangeChecker(long long res, CommandCode command)
 
 void Processor::OutRangeChecker(long double res, CommandCode command)
 {
-    if (abs(res) > maxFloat || abs(res) < minFloat)
+    if (res != 0 && (abs(res) > maxFloat || abs(res) < minFloat))
     {
         Err = true;
         throw MathOutRange(saveRA, (int)command, op1, op2, op3, (float)F1, (float)F2);
