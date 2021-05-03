@@ -45,12 +45,12 @@ Processor::~Processor()
 
 void Processor::Input_PunchedCard(ifstream& fin)
 {
-    pars_obj.get_punched_card(fin, &memory);
+    pars_obj.get_punched_card(fin, memory);
 }
 
-void Processor::outMemory(ofstream& fout)
+string Processor::outMemory()
 {
-    memory.outMemory(fout);
+    return memory.outMemory();
 }
 
 void Processor::inInt()
@@ -101,13 +101,19 @@ void Processor::addInt()
 
 void Processor::subInt()
 {
-    LoadRegisters(I1, I2);
-    long long res = (long long)I1 - (long long)I2;
+    if (op2 == op3)
+    {
+        SubSelfSelf();
+    }else
+    {
+        LoadRegisters(I1, I2);
+        long long res = (long long)I1 - (long long)I2;
 
-    OutRangeChecker(res, SUBINT);
+        OutRangeChecker(res, SUBINT);
 
-    omega_res((int)res);
-    Summator = Parser::itos((int)res);
+        omega_res((int) res);
+        Summator = Parser::itos((int) res);
+    }
     memory.push(op1, Summator);
 }
 
@@ -201,13 +207,19 @@ void Processor::addFloat()
 
 void Processor::subFloat()
 {
-    LoadRegisters(F1, F2);
-    long double res = F1 - F2;
+    if (op2 == op3)
+    {
+        SubSelfSelf();
+    }else
+    {
+        LoadRegisters(F1, F2);
+        long double res = F1 - F2;
 
-    OutRangeChecker(res, SUBFLOAT);
+        OutRangeChecker(res, SUBFLOAT);
 
-    omega_res((float)res);
-    Summator = Parser::ftos((float)res);
+        omega_res((float) res);
+        Summator = Parser::ftos((float) res);
+    }
     memory.push(op1, Summator);
 }
 
@@ -312,22 +324,15 @@ void Processor::send()
     memory.push(op1, memory.get(op3));
 }
 
-void Processor::clear_memory()
-{
-    memory.clear();
-}
-
 bool Processor::tact()
 {
     saveRA = RA;
     RK = memory.get(RA);
     RA = (RA + 1) % 512;
 
-    CommandCode command;
+    Parser::cellParser(RK, RKcommand, op1, op2, op3);
 
-    Parser::cellParser(RK, command, op1, op2, op3);
-
-    switch (command)
+    switch (RKcommand)
     {
         case CommandCode::ININT:
             inInt();
@@ -404,7 +409,7 @@ bool Processor::tact()
         case CommandCode::END:
             return false;
         default:
-            throw Bad_command(saveRA, (int)command, op1, op2, op3);
+            throw Bad_command(saveRA, (int)RKcommand, op1, op2, op3);
     }
     return true;
 }
@@ -418,7 +423,6 @@ void Processor::main_process()
 
     catch (memoryUndefined& err)
     {
-        cout << "Erg";
         throw memoryUndefined(saveRA, err.address);
     }
 }
@@ -428,18 +432,18 @@ void Processor::set_max_iterations(int num)
     max_iterations = num;
 }
 
-Memory* Processor::get_Memory()
-{
-    return &memory;
-}
-
 string Processor::output_stat()
 {
     string answer;
     answer += "\n-----------------------------------------------------\n";
     answer += "Register statistics:\n";
-    answer += "Last command: ";
+    answer +=  "RK      : ";
     answer += Parser::itos(saveRA, 3, 10) + " " + RK;
+    answer += "\n";
+    answer +=  "Pars RK : " + pars_obj.getComLex(RKcommand) + " " +
+               Parser::itos(op1, 3, 10) + " " +
+               Parser::itos(op2, 3, 10) + " " +
+               Parser::itos(op3, 3, 10);
     answer += "\n";
     answer += ("R1      : " + R1);
     answer += "\n";
@@ -447,7 +451,7 @@ string Processor::output_stat()
     answer += "\n";
     answer += ("Summator: " + Summator);
     answer += "\n";
-    answer += ("Omega: ");
+    answer += ("Omega   : ");
     answer += (char) ('0' + omega);
     answer += "\n";
     return answer;
@@ -485,4 +489,12 @@ void Processor::OutRangeChecker(long double res, CommandCode command)
         Err = true;
         throw MathOutRange(saveRA, (int)command, op1, op2, op3, (float)F1, (float)F2);
     }
+}
+
+void Processor::SubSelfSelf()
+{
+    Summator = "00000000000000000000000000000000";
+    R1       = "00000000000000000000000000000000";
+    R2       = "00000000000000000000000000000000";
+    omega    = 0;
 }

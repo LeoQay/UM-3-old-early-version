@@ -2,11 +2,17 @@
 #include <iostream>
 #include <fstream>
 
+struct Cell
+{
+    std::string val;
+    bool empty;
+};
+
 class Memory
 {
 private:
     int mem_size = 512;
-    std::string mem_mas[512];
+    Cell mem_mas[512];
 public:
     Memory();
 
@@ -14,7 +20,5 @@ public:
 
     void push(int index, std::string new_val);
 
-    void clear();
-
-    void outMemory(std::ofstream& fout);
+    std::string outMemory();
 };

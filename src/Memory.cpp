@@ -2,43 +2,43 @@
 #include "Memory.h"
 #include "Exception.h"
 
-#include <iostream>
+#include <sstream>
 
 Memory::Memory()
 {
     for (auto & var : mem_mas)
-        var = "Empty";
+    {
+        var.val = "";
+        var.empty = true;
+    }
 }
 
 std::string Memory::get(int index)
 {
-    if (mem_mas[index] == "Empty")
+    if (mem_mas[index].empty == true)
         throw memoryUndefined(0, index);
 
-    return mem_mas[index];
+    return mem_mas[index].val;
 }
 
 void Memory::push(int index, std::string new_val)
 {
-    mem_mas[index] = std::move(new_val);
+    mem_mas[index].val = std::move(new_val);
+    mem_mas[index].empty = false;
 }
 
-void Memory::clear()
+std::string Memory::outMemory()
 {
-    for (auto & var : mem_mas)
-        var = "Empty";
-}
-
-void Memory::outMemory(std::ofstream &fout)
-{
+    std::ostringstream answer;
     for (int i = 0; i < 512; i++)
-        if (mem_mas[i] != "Empty")
+        if (!mem_mas[i].empty)
         {
             if (i < 10)
-                fout << "  ";
+                answer << "  ";
             else if (i < 100)
-                fout << " ";
+                answer << " ";
 
-            fout << i << " " << mem_mas[i] << "\n";
+            answer << i << " " << mem_mas[i].val << "\n";
         }
+    return answer.str();
 }

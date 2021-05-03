@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Processor.h"
 #include "Exception.h"
 
@@ -15,8 +15,6 @@ int main()
         processor.Input_PunchedCard(fin);
 
         processor.main_process();
-
-        processor.outMemory(fout);
     }
 
     catch (Exception& err)
@@ -24,6 +22,8 @@ int main()
         cout << "\nError in the cell " << err.cell_number << "\n" << err.what() << "\n\n";
         return 1;
     }
+
+    fout << processor.outMemory();
 
     fin.close();
     fout.close();

@@ -17,6 +17,7 @@ private:
     int RA;              /* счетчик адреса, содержит адрес следующей команды  */
     bool Err;            /* регистр ошибок, true - произошла ошибка  */
     string RK;           /* текущая команда  */
+    CommandCode RKcommand;
     int op1, op2, op3;   // current operands
     int omega;           /* 0 - результат равен 0, 1 - меньше 0, 2 - больше 0  */
     int iterations;
@@ -88,18 +89,16 @@ private:
     void OutRangeChecker (long long res, CommandCode command);
 
     void OutRangeChecker (long double res, CommandCode command);
+
+    void SubSelfSelf();
 public:
     Processor();
 
     ~Processor();
 
-    Memory* get_Memory();
-
     void Input_PunchedCard(ifstream& fin);
 
-    void outMemory(ofstream& fout);
-
-    void clear_memory();
+    string outMemory();
 
     void set_max_iterations(int num);
 

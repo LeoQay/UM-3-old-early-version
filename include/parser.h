@@ -75,7 +75,7 @@ public:
 
     static std::string itos (int value, int length = 32, int new_system = 2);   // integer to string
 
-    void get_punched_card (std::ifstream &fin, Memory* mem_obj);
+    void get_punched_card (std::ifstream &fin, Memory& mem_obj);
 
     static bool number (std::string s); // true, еслм в строке целое число
 
@@ -90,4 +90,6 @@ public:
     static float getTokenFloat();
 
     static bool stringCmpGE (std::string s1, std::string s2);   // compare, stringCmpGE("-2", "3") = false
+
+    std::string getComLex(CommandCode command);
 };

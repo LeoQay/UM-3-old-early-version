@@ -48,7 +48,7 @@ string Parser::getTokenCell (string& token, int num)
     return answer;
 }
 
-void Parser::get_punched_card (ifstream &fin, Memory* mem_obj)
+void Parser::get_punched_card (ifstream &fin, Memory& mem_obj)
 {
     // функция парсит перфокарту и бросает исключения, если допущены ошибки
     int cellNumber = 0;
@@ -107,7 +107,7 @@ void Parser::get_punched_card (ifstream &fin, Memory* mem_obj)
             result += itos(token_val, 9);
         }
 
-        (*mem_obj).push(position, result);
+        mem_obj.push(position, result);
     }
 }
 
@@ -291,4 +291,12 @@ float Parser::getTokenFloat()
     }
 
     return (float)strtod(token.c_str(), nullptr);
+}
+
+string Parser::getComLex(CommandCode command)
+{
+    for (auto & var : mapCommands)
+        if (var.second == command)
+            return var.first;
+    return "";
 }
