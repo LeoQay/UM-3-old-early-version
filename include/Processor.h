@@ -6,7 +6,7 @@ using namespace std;
 class Processor
 {
 private:
-    Memory mem_obj;
+    Memory memory;
     Parser pars_obj;
 
     string R1;           /* первый регистр АЛУ */
@@ -88,7 +88,6 @@ private:
     void OutRangeChecker (long long res, CommandCode command);
 
     void OutRangeChecker (long double res, CommandCode command);
-
 public:
     Processor();
 
@@ -96,9 +95,9 @@ public:
 
     Memory* get_Memory();
 
-    void input_punched_card(ifstream& fin);
+    void Input_PunchedCard(ifstream& fin);
 
-    void output_memory(ofstream& fout);
+    void outMemory(ofstream& fout);
 
     void clear_memory();
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "memory_cl.h"
+#include "Memory.h"
 
 #include <iostream>
 #include <fstream>

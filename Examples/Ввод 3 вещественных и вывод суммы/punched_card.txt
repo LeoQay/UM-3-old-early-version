@@ -1,6 +1,7 @@
 ; ввожу три вещественных числа и вывожу их сумму
-1 INFLOAT 101 3 0
-2 ADDFLOAT 101 101 102
-3 ADDFLOAT 101 101 103
-4 OUTFLOAT 101 1 0
+
+1 INFLOAT   101    3    0
+2 ADDFLOAT  101  101  102
+3 ADDFLOAT  101  101  103
+4 OUTFLOAT  101    1    0
 5 END 0 0 0

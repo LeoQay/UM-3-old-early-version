@@ -1,6 +1,6 @@
 #pragma once
 #include "Processor.h"
-#include "Exceptions.h"
+#include "Exception.h"
 
 #include <cmath>
 
@@ -32,8 +32,8 @@ Processor::Processor()
     /* если не установить максимальное число итераций,
      * то iterations никогда не равен max_iterations */
 
-    maxInt = 2147483647;
-    minInt = -2147483648;
+    maxInt = 2147483647ll;
+    minInt = -2147483648ll;
     maxFloat = 3.402823466 * pow(10, 38);
     minFloat = 1.175494351 * pow(10, -38);
 }
@@ -43,22 +43,14 @@ Processor::~Processor()
     cout << output_stat();
 }
 
-void Processor::input_punched_card(ifstream& fin)
+void Processor::Input_PunchedCard(ifstream& fin)
 {
-    pars_obj.get_punched_card(fin, &mem_obj);
+    pars_obj.get_punched_card(fin, &memory);
 }
 
-void Processor::output_memory(ofstream& fout)
+void Processor::outMemory(ofstream& fout)
 {
-    for (int i = 0; i < 512; i++)
-    {
-        if (i < 10)
-            fout << "  ";
-        else if (i < 100)
-            fout << " ";
-
-        fout << i << " " << mem_obj.get(i) << "\n";
-    }
+    memory.outMemory(fout);
 }
 
 void Processor::inInt()
@@ -78,13 +70,13 @@ void Processor::inInt()
                 ok = true;
             }
 
-            catch (Exceptions &err) {
+            catch (Exception &err) {
                 cout << err.what() << "\n";
                 cout << "Rewrite please:";
             }
         }
 
-        mem_obj.push(op1, Parser::itos(value));
+        memory.push(op1, Parser::itos(value));
         op1 = (op1 + 1) % 512;
     }
 }
@@ -92,7 +84,7 @@ void Processor::inInt()
 void Processor::outInt()
 {
     while(op2-- > 0)
-        cout << Parser::stoi(mem_obj.get(op1++)) << "\n";
+        cout << Parser::stoi(memory.get(op1++)) << "\n";
 }
 
 void Processor::addInt()
@@ -104,7 +96,7 @@ void Processor::addInt()
 
     omega_res((int)res);
     Summator = Parser::itos((int)res);
-    mem_obj.push(op1, Summator);
+    memory.push(op1, Summator);
 }
 
 void Processor::subInt()
@@ -116,7 +108,7 @@ void Processor::subInt()
 
     omega_res((int)res);
     Summator = Parser::itos((int)res);
-    mem_obj.push(op1, Summator);
+    memory.push(op1, Summator);
 }
 
 void Processor::mulInt()
@@ -128,7 +120,7 @@ void Processor::mulInt()
 
     omega_res((int)res);
     Summator = Parser::itos((int)res);
-    mem_obj.push(op1, Summator);
+    memory.push(op1, Summator);
 }
 
 void Processor::divInt()
@@ -143,7 +135,7 @@ void Processor::divInt()
 
     omega_res((int)res);
     Summator = Parser::itos((int)res);
-    mem_obj.push(op1, Summator);
+    memory.push(op1, Summator);
 }
 
 void Processor::modInt()
@@ -158,7 +150,7 @@ void Processor::modInt()
 
     omega_res((int)res);
     Summator = Parser::itos((int)res);
-    mem_obj.push(op1, Summator);
+    memory.push(op1, Summator);
 }
 
 void Processor::inFloat()
@@ -178,13 +170,13 @@ void Processor::inFloat()
                 ok = true;
             }
 
-            catch (Exceptions &err) {
+            catch (Exception &err) {
                 cout << err.what() << "\n";
                 cout << "Rewrite please:";
             }
         }
 
-        mem_obj.push(op1, Parser::ftos(value));
+        memory.push(op1, Parser::ftos(value));
         op1 = (op1 + 1) % 512;
     }
 }
@@ -192,7 +184,7 @@ void Processor::inFloat()
 void Processor::outFloat()
 {
     while(op2-- > 0)
-        cout << (float)(Parser::stold(mem_obj.get(op1++))) << "\n";
+        cout << (float)(Parser::stold(memory.get(op1++))) << "\n";
 }
 
 void Processor::addFloat()
@@ -204,7 +196,7 @@ void Processor::addFloat()
 
     omega_res((float)res);
     Summator = Parser::ftos((float)res);
-    mem_obj.push(op1, Summator);
+    memory.push(op1, Summator);
 }
 
 void Processor::subFloat()
@@ -216,7 +208,7 @@ void Processor::subFloat()
 
     omega_res((float)res);
     Summator = Parser::ftos((float)res);
-    mem_obj.push(op1, Summator);
+    memory.push(op1, Summator);
 }
 
 void Processor::mulFloat()
@@ -228,7 +220,7 @@ void Processor::mulFloat()
 
     omega_res((float)res);
     Summator = Parser::ftos((float)res);
-    mem_obj.push(op1, Summator);
+    memory.push(op1, Summator);
 }
 
 void Processor::divFloat()
@@ -243,26 +235,26 @@ void Processor::divFloat()
 
     omega_res((float)res);
     Summator = Parser::ftos((float)res);
-    mem_obj.push(op1, Summator);
+    memory.push(op1, Summator);
 }
 
 void Processor::intToFloat ()
 {
     // int is always placed in float
-    mem_obj.push(op1, Parser::ftos((float)Parser::stoi(mem_obj.get(op3))));
+    memory.push(op1, Parser::ftos((float)Parser::stoi(memory.get(op3))));
 }
 
 void Processor::floatToInt ()
 {
-    long double F = Parser::stold(mem_obj.get(op3));
+    long double F = Parser::stold(memory.get(op3));
 
     if (F < minInt || F > maxInt)
     {
         Err = true;
-        throw FTOIOutRange(saveRA, (int)CommandCode::FTOI, op1, op3, F);
+        throw FTOIOutRange(saveRA, (int)CommandCode::FTOI, op1, op2, op3, F);
     }
 
-    mem_obj.push(op1, Parser::itos((int)F));
+    memory.push(op1, Parser::itos((int)F));
 }
 
 void Processor::unconditional ()
@@ -317,18 +309,18 @@ void Processor::just_if ()
 
 void Processor::send()
 {
-    mem_obj.push(op1, mem_obj.get(op3));
+    memory.push(op1, memory.get(op3));
 }
 
 void Processor::clear_memory()
 {
-    mem_obj.clear();
+    memory.clear();
 }
 
 bool Processor::tact()
 {
-    RK = mem_obj.get(RA);
     saveRA = RA;
+    RK = memory.get(RA);
     RA = (RA + 1) % 512;
 
     CommandCode command;
@@ -419,7 +411,16 @@ bool Processor::tact()
 
 void Processor::main_process()
 {
-    while (!Err && iterations++ != max_iterations && tact());
+    try
+    {
+        while (!Err && iterations++ != max_iterations && tact());
+    }
+
+    catch (memoryUndefined& err)
+    {
+        cout << "Erg";
+        throw memoryUndefined(saveRA, err.address);
+    }
 }
 
 void Processor::set_max_iterations(int num)
@@ -429,7 +430,7 @@ void Processor::set_max_iterations(int num)
 
 Memory* Processor::get_Memory()
 {
-    return &mem_obj;
+    return &memory;
 }
 
 string Processor::output_stat()
@@ -454,16 +455,16 @@ string Processor::output_stat()
 
 void Processor::LoadRegisters(int &REG1, int &REG2)
 {
-    R1 = mem_obj.get(op2);
-    R2 = mem_obj.get(op3);
+    R1 = memory.get(op2);
+    R2 = memory.get(op3);
     REG1 = Parser::stoi(R1);
     REG2 = Parser::stoi(R2);
 }
 
 void Processor::LoadRegisters(long double &REG1, long double &REG2)
 {
-    R1 = mem_obj.get(op2);
-    R2 = mem_obj.get(op3);
+    R1 = memory.get(op2);
+    R2 = memory.get(op3);
     REG1 = Parser::stold(R1);
     REG2 = Parser::stold(R2);
 }

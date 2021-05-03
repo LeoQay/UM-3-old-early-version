@@ -1,6 +1,6 @@
 #pragma once
 #include "parser.h"
-#include "Exceptions.h"
+#include "Exception.h"
 
 #include <sstream>
 #include <cmath>
@@ -246,13 +246,13 @@ bool Parser::stringCmpGE (string s1, string s2)      // return s1 >= s2 ? true :
         s2.erase(0, 1);
     }
 
-    if (s1.length() > s2.length()) return true xor reverse;
-    if (s1.length() < s2.length()) return false xor reverse;
+    if (s1.length() > s2.length()) return true ^ reverse;
+    if (s1.length() < s2.length()) return false ^ reverse;
 
     if (s1 >= s2)
-        return true xor reverse;
+        return true ^ reverse;
     else
-        return false xor reverse;
+        return false ^ reverse;
 }
 
 float Parser::getTokenFloat()
@@ -278,13 +278,14 @@ float Parser::getTokenFloat()
     {
         if (!number(token))
             throw Bad_token(0, token, "Bad float token!");
-    }else if (token[token.length() - 1] == '.')
+    }else if (commaPos == token.length() - 1)
     {
         if (!number(token.substr(0, commaPos)))
             throw Bad_token(0, token, "Bad float token!");
     }else
     {
         if (!number(token.substr(0, commaPos)) ||
+            token[commaPos + 1] == '-' ||
             !number(token.substr(commaPos + 1, token.length() - commaPos)))
             throw Bad_token(0, token, "Bad float token!");
     }

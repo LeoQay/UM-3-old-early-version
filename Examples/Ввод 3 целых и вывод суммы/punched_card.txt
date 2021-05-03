@@ -1,6 +1,7 @@
 ; ввожу три целых числа и вывожу их сумму
-1 ININT 101 3 0
-2 ADDINT 101 101 102
-3 ADDINT 101 101 103
-4 OUTINT 101 1 0
-5 END 0 0 0
+
+1 ININT   101    3    0    ; cin >> a >> b >> c
+2 ADDINT  101  101  102    ; a = a + b
+3 ADDINT  101  101  103    ; a = a + c
+4 OUTINT  101    1    0    ; cout << a
+5 END       0    0    0    ; return

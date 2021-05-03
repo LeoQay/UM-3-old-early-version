@@ -15,4 +15,6 @@ public:
     void push(int index, std::string new_val);
 
     void clear();
+
+    void outMemory(std::ofstream& fout);
 };

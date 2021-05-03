@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 #include "Processor.h"
-#include "Exceptions.h"
+#include "Exception.h"
 
 #include <fstream>
 
@@ -9,19 +9,17 @@ int main()
     ifstream fin("punched_card.txt");
     ofstream fout("result.txt");
 
-    Processor proc_obj;
+    Processor processor;
 
     try {
-        proc_obj.input_punched_card(fin);
+        processor.Input_PunchedCard(fin);
 
-        proc_obj.main_process();
+        processor.main_process();
 
-        proc_obj.output_memory(fout);
-
-        proc_obj.clear_memory();
+        processor.outMemory(fout);
     }
 
-    catch (Exceptions& err)
+    catch (Exception& err)
     {
         cout << "\nError in the cell " << err.cell_number << "\n" << err.what() << "\n\n";
         return 1;

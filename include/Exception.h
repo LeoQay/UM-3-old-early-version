@@ -5,13 +5,13 @@
 #include <iostream>
 #include <sstream>
 
-class Exceptions : std::exception
+class Exception : std::exception
 {
 protected:
     std::string message;
 public:
     int cell_number;
-    explicit Exceptions (int num, std::string message = "Error!") :
+    explicit Exception (int num, std::string message = "Error!") :
                          message(move(message)), cell_number(num) {};
 
     const char* what() noexcept
@@ -20,11 +20,11 @@ public:
     }
 };
 
-class ParserException : public Exceptions
+class ParserException : public Exception
 {
 public:
     explicit ParserException (int num, std::string message = "Bad cell!") :
-                              Exceptions(num, move(message)) {};
+                              Exception(num, move(message)) {};
 };
 
 class Empty : public ParserException
@@ -56,11 +56,11 @@ public:
     }
 };
 
-class ProcessorException : public Exceptions
+class ProcessorException : public Exception
 {
 public:
     ProcessorException (int num,int err_com, int op1, int op2, int op3, std::string message = "Runtime error!") :
-    Exceptions(num, move(message))
+    Exception(num, move(message))
     {
         std::ostringstream oss;
         oss << "\nCell: " << err_com << " " << op1 << " " << op2 << " " << op3;
@@ -128,12 +128,32 @@ public:
 class FTOIOutRange : public MathOutRange
 {
 public:
-    FTOIOutRange (int num, int err_com, int op1, int op3, long double res,
+    FTOIOutRange (int num, int err_com, int op1, int op2, int op3, long double res,
                   std::string message = "Float to int out range!") :
-                  MathOutRange(num, err_com, op1, 0, op3, move(message))
+                  MathOutRange(num, err_com, op1, op2, op3, move(message))
     {
         std::ostringstream oss;
         oss << "\n" << "Bad value: " << res;
         this->message += oss.str();
     }
+};
+
+class MemoryException : public Exception
+{
+public:
+    MemoryException (int num, int address, std::string message = "Memory exception!") :
+            Exception(num, move(message))
+    {
+        std::ostringstream oss;
+        oss << "\nAddress: " << address;
+        this->message += oss.str();
+    }
+};
+
+class memoryUndefined : public MemoryException
+{
+public:
+    int address;
+    memoryUndefined (int num, int address, std::string message = "Accessing Undefined Memory!") :
+            MemoryException(num, address, move(message)) { this->address = address; }
 };
