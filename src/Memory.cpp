@@ -16,7 +16,7 @@ Memory::Memory()
 std::string Memory::get(int index)
 {
     if (mem_mas[index].empty == true)
-        throw memoryUndefined(0, index);
+        throw MemoryUndefined(0, index);
 
     return mem_mas[index].val;
 }

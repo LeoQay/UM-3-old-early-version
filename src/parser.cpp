@@ -293,7 +293,7 @@ float Parser::getTokenFloat()
     return (float)strtod(token.c_str(), nullptr);
 }
 
-string Parser::getComLex(CommandCode command)
+string Parser::getCommandLexem(CommandCode command)
 {
     for (auto & var : mapCommands)
         if (var.second == command)

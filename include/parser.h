@@ -91,5 +91,5 @@ public:
 
     static bool stringCmpGE (std::string s1, std::string s2);   // compare, stringCmpGE("-2", "3") = false
 
-    std::string getComLex(CommandCode command);
+    std::string getCommandLexem(CommandCode command);
 };

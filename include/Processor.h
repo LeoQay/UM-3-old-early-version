@@ -8,6 +8,7 @@ class Processor
 private:
     Memory memory;
     Parser pars_obj;
+    ofstream& logFile;
 
     string R1;           /* первый регистр АЛУ */
     string R2;           /* второй регистр АЛУ */
@@ -82,9 +83,9 @@ private:
 
     bool tact();
 
-    void LoadRegisters (int& REG1, int& REG2);
+    void LoadRegisters (int& REG1, int& REG2, string command, string sign);
 
-    void LoadRegisters (long double& REG1, long double& REG2);
+    void LoadRegisters (long double& REG1, long double& REG2, string command, string sign);
 
     void OutRangeChecker (long long res, CommandCode command);
 
@@ -92,7 +93,7 @@ private:
 
     void SubSelfSelf();
 public:
-    Processor();
+    explicit Processor(ofstream& log);
 
     ~Processor();
 
