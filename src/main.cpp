@@ -7,6 +7,13 @@
 int main()
 {
     ifstream fin("punched_card.txt");
+
+    if (!fin.is_open())
+    {
+        cout << "File 'punched_card.txt' lost\n";
+        return 1;
+    }
+
     ofstream fout("result.txt");
     ofstream logFile("log.txt");
 

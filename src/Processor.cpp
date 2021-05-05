@@ -91,9 +91,10 @@ void Processor::outInt()
 {
     while(op2-- > 0)
     {
-        int val = Parser::stoi(memory.get(op1++));
+        int val = Parser::stoi(memory.get(op1));
         logFile << "Int from " << "<"<<op1<<">" << ": " << val << "\n";
         cout << "Int from " << "<"<<op1<<">" << ": " << val << "\n";
+        op1 = (op1 + 1) % 512;
     }
 }
 
@@ -206,9 +207,10 @@ void Processor::outFloat()
 {
     while(op2-- > 0)
     {
-        auto val = (float)(Parser::stold(memory.get(op1++)));
+        auto val = (float)(Parser::stold(memory.get(op1)));
         logFile << "Float from " << "<"<<op1<<">" << ": " << val << "\n";
         cout << "Float from " << "<"<<op1<<">" << ": " << val << "\n";
+        op1 = (op1 + 1) % 512;
     }
 }
 
@@ -304,7 +306,8 @@ void Processor::PR()
     {
         RA = op2;
         logFile << ", Jump from " << saveRA << " to " << op2 << "\n";
-    }
+    }else
+        logFile << "\n";
 }
 
 void Processor::PNR ()
@@ -314,7 +317,8 @@ void Processor::PNR ()
     {
         RA = op2;
         logFile << ", Jump from " << saveRA << " to " << op2 << "\n";
-    }
+    }else
+        logFile << "\n";
 }
 
 void Processor::PB ()
@@ -324,7 +328,8 @@ void Processor::PB ()
     {
         RA = op2;
         logFile << ", Jump from " << saveRA << " to " << op2 << "\n";
-    }
+    }else
+        logFile << "\n";
 }
 
 void Processor::PM ()
@@ -334,7 +339,8 @@ void Processor::PM ()
     {
         RA = op2;
         logFile << ", Jump from " << saveRA << " to " << op2 << "\n";
-    }
+    }else
+        logFile << "\n";
 }
 
 void Processor::PBR ()
@@ -344,7 +350,8 @@ void Processor::PBR ()
     {
         RA = op2;
         logFile << ", Jump from " << saveRA << " to " << op2 << "\n";
-    }
+    }else
+        logFile << "\n";
 }
 
 void Processor::PMR ()
@@ -354,7 +361,8 @@ void Processor::PMR ()
     {
         RA = op2;
         logFile << ", Jump from " << saveRA << " to " << op2 << "\n";
-    }
+    }else
+        logFile << "\n";
 }
 
 void Processor::just_if ()
@@ -379,6 +387,7 @@ void Processor::just_if ()
 void Processor::send()
 {
     memory.push(op1, memory.get(op3));
+    logFile << "SEND from " << "<"<<op3<<">" << " to " << "<"<<op1<<">" << "\n";
 }
 
 bool Processor::tact()
