@@ -79,7 +79,7 @@ private:
 
     void just_if();
 
-    void send();
+    void mov();
 
     bool tact();
 

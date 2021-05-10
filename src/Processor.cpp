@@ -21,7 +21,7 @@ Processor::Processor(ofstream& log) : logFile(log)
     Err = false;
     omega = 0;
     RK = "Empty";
-    RKcommand = END;
+    RKcommand = CommandCode::END;
     R1 = "Empty";
     R2 = "Empty";
     I1 = 0, I2 = 0;
@@ -181,8 +181,8 @@ void Processor::inFloat()
     {
         bool ok = false;
 
-        cout << "Input float to " << "<"<<op1<<">" << ">:";
-        logFile << "Input float to "<< "<"<<op1<<">" << ":";
+        cout << "Input real to " << "<"<<op1<<">" << ">:";
+        logFile << "Input real to "<< "<"<<op1<<">" << ":";
 
         while (!ok)
         {
@@ -208,18 +208,18 @@ void Processor::outFloat()
     while(op2-- > 0)
     {
         auto val = (float)(Parser::stold(memory.get(op1)));
-        logFile << "Float from " << "<"<<op1<<">" << ": " << val << "\n";
-        cout << "Float from " << "<"<<op1<<">" << ": " << val << "\n";
+        logFile << "Real from " << "<"<<op1<<">" << ": " << val << "\n";
+        cout << "Real from " << "<"<<op1<<">" << ": " << val << "\n";
         op1 = (op1 + 1) % 512;
     }
 }
 
 void Processor::addFloat()
 {
-    LoadRegisters(F1, F2, "ADDFLOAT", "+");
+    LoadRegisters(F1, F2, "ADDREAL", "+");
     long double res = F1 + F2;
 
-    OutRangeChecker(res, ADDFLOAT);
+    OutRangeChecker(res, ADDREAL);
 
     omega_res((float)res);
     Summator = Parser::ftos((float)res);
@@ -233,10 +233,10 @@ void Processor::subFloat()
         SubSelfSelf();
     }else
     {
-        LoadRegisters(F1, F2, "SUBFLOAT", "-");
+        LoadRegisters(F1, F2, "SUBREAL", "-");
         long double res = F1 - F2;
 
-        OutRangeChecker(res, SUBFLOAT);
+        OutRangeChecker(res, SUBREAL);
 
         omega_res((float) res);
         Summator = Parser::ftos((float) res);
@@ -246,10 +246,10 @@ void Processor::subFloat()
 
 void Processor::mulFloat()
 {
-    LoadRegisters(F1, F2, "MULFLOAT", "*");
+    LoadRegisters(F1, F2, "MULREAL", "*");
     long double res = F1 * F2;
 
-    OutRangeChecker(res, MULFLOAT);
+    OutRangeChecker(res, MULREAL);
 
     omega_res((float)res);
     Summator = Parser::ftos((float)res);
@@ -258,13 +258,13 @@ void Processor::mulFloat()
 
 void Processor::divFloat()
 {
-    LoadRegisters(F1, F2, "DIVFLOAT", "/");
+    LoadRegisters(F1, F2, "DIVREAL", "/");
 
-    if (F2 == 0) throw NULL_DIVIDE(saveRA, (int)CommandCode::DIVFLOAT, op1, op2, op3);
+    if (F2 == 0) throw NULL_DIVIDE(saveRA, (int)CommandCode::DIVREAL, op1, op2, op3);
 
     long double res = F1 / F2;
 
-    OutRangeChecker(res, DIVFLOAT);
+    OutRangeChecker(res, DIVREAL);
 
     omega_res((float)res);
     Summator = Parser::ftos((float)res);
@@ -275,7 +275,7 @@ void Processor::intToFloat ()
 {
     // int is always placed in float
     memory.push(op1, Parser::ftos((float)Parser::stoi(memory.get(op3))));
-    logFile << "<"<<op1<<">" << " = " << "(float)" << "<"<<op3<<">" << "\n";
+    logFile << "<"<<op1<<">" << " = " << "(real)" << "<"<<op3<<">" << "\n";
 }
 
 void Processor::floatToInt ()
@@ -285,17 +285,17 @@ void Processor::floatToInt ()
     if (F < minInt || F > maxInt)
     {
         Err = true;
-        throw FTOIOutRange(saveRA, (int)CommandCode::FTOI, op1, op2, op3, F);
+        throw FTOIOutRange(saveRA, (int)CommandCode::RTOI, op1, op2, op3, F);
     }
 
     memory.push(op1, Parser::itos((int)F));
-    logFile << "<"<<op1<<">" << " = " << "(float)" << "<"<<op3<<">" << "\n";
+    logFile << "<"<<op1<<">" << " = " << "(real)" << "<"<<op3<<">" << "\n";
 }
 
 void Processor::unconditional ()
 {
     RA = op2;
-    logFile << "UNCOND: ";
+    logFile << "JUMP: ";
     logFile << "Jump from " << saveRA << " to " << op2 << "\n";
 }
 
@@ -384,10 +384,10 @@ void Processor::just_if ()
     }
 }
 
-void Processor::send()
+void Processor::mov()
 {
     memory.push(op1, memory.get(op3));
-    logFile << "SEND from " << "<"<<op3<<">" << " to " << "<"<<op1<<">" << "\n";
+    logFile << "MOV from " << "<"<<op3<<">" << " to " << "<"<<op1<<">" << "\n";
 }
 
 bool Processor::tact()
@@ -421,31 +421,31 @@ bool Processor::tact()
         case CommandCode::MOD:
             modInt();
             break;
-        case CommandCode::INFLOAT:
+        case CommandCode::INREAL:
             inFloat();
             break;
-        case CommandCode::OUTFLOAT:
+        case CommandCode::OUTREAL:
             outFloat();
             break;
-        case CommandCode::ADDFLOAT:
+        case CommandCode::ADDREAL:
             addFloat();
             break;
-        case CommandCode::SUBFLOAT:
+        case CommandCode::SUBREAL:
             subFloat();
             break;
-        case CommandCode::MULFLOAT:
+        case CommandCode::MULREAL:
             mulFloat();
             break;
-        case CommandCode::DIVFLOAT:
+        case CommandCode::DIVREAL:
             divFloat();
             break;
-        case CommandCode::ITOF:
+        case CommandCode::ITOR:
             intToFloat();
             break;
-        case CommandCode::FTOI:
+        case CommandCode::RTOI:
             floatToInt();
             break;
-        case CommandCode::UNCOND:
+        case CommandCode::JUMP:
             unconditional();
             break;
         case CommandCode::PR:
@@ -469,8 +469,8 @@ bool Processor::tact()
         case CommandCode::IF:
             just_if();
             break;
-        case CommandCode::SEND:
-            send();
+        case CommandCode::MOV:
+            mov();
             break;
         case CommandCode::END:
             return false;

@@ -22,7 +22,7 @@ int main()
         return 1;
     }
 
-    ofstream fout("result.txt");
+    ofstream fout("memory.txt");
     ofstream logFile("log.txt");
 
     auto processor = new Processor(logFile);
