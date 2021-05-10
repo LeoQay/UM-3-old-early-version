@@ -2,10 +2,18 @@
 #include "Processor.h"
 #include "Exception.h"
 
+
 #include <fstream>
+#include <Windows.h>
+#include <locale>
 
 int main()
 {
+    setlocale(LC_ALL, "Russian");
+    
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+
     ifstream fin("punched_card.txt");
 
     if (!fin.is_open())
