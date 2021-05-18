@@ -1,9 +1,9 @@
 #pragma once
-#include "Memory.h"
 
-#include <iostream>
-#include <fstream>
 #include <map>
+#include <string>
+
+#include "Memory.h"
 
 enum CommandCode {
     ININT = 16,

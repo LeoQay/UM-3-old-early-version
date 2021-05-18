@@ -1,19 +1,37 @@
 #pragma once
+
+#include <fstream>
+#include <iostream>
+#include <locale>
+
 #include "Processor.h"
 #include "Exception.h"
 
 
-#include <fstream>
-#include <Windows.h>
-#include <locale>
+using namespace std;
 
-int main()
+int main(int argc, char **argv)
 {
     setlocale(LC_ALL, "Russian");
-    
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
 
+    if(argc<4)
+    {
+        cout << "This program is an implementation of UM-3 computer\n"
+                "We need to run it following file names in argumets:\n"
+                "   memory.txt -- final state of memory\n"
+                "   punched_card.txt -- program code\n"
+                "              (overide default memory state)\n"
+                "   log.txt -- file where all commands and operands\n"
+                "              are stored\n\n";
+
+        return 1;
+    }
+
+    char *log_file_name=argv[3];
+    char *punched_card_file_name=argv[2];
+    char *memory_file_name=argv[1];
+    
+    /*
     ifstream fin("punched_card.txt");
 
     if (!fin.is_open())
@@ -24,30 +42,26 @@ int main()
 
     ofstream fout("memory.txt");
     ofstream logFile("log.txt");
+    */
 
-    auto processor = new Processor(logFile);
+    Processor processor(log_file_name);
 
     try
     {
-        (*processor).Input_PunchedCard(fin);
+        processor.Input_PunchedCard(punched_card_file_name);
     }
 
     catch (Exception& err)
     {
         logFile << "Punched card load fail\n";
-        cout << "\nError in the line " << err.cell_number << "\n" << err.what() << "\n\n";
+        cerr << "\nError in the line " << err.cell_number << "\n" << err.what() << "\n\n";
         logFile << "\nError in the line " << err.cell_number << "\n" << err.what() << "\n\n";
 
-        delete processor;
-        cin.get();
-        fin.close();
-        fout.close();
-        logFile.close();
         return 1;
     }
 
     try{
-        (*processor).main_process();
+        processor.main_process();
     }
 
     catch (Exception& err)
@@ -55,20 +69,10 @@ int main()
         cout << "\nError in the cell " << err.cell_number << "\n" << err.what() << "\n\n";
         logFile << "\nError in the cell " << err.cell_number << "\n" << err.what() << "\n\n";
 
-        delete processor;
-        cin.get();
-        fin.close();
-        fout.close();
-        logFile.close();
         return 1;
     }
 
-    fout << (*processor).outMemory();
+    processor.outMemory(memory_file_name);
 
-    delete processor;
-    cin.get();
-    fin.close();
-    fout.close();
-    logFile.close();
     return 0;
 }
